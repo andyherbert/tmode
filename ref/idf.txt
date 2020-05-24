@@ -1,0 +1,50 @@
+function idf(bytes, options) {
+    var file, columns, imageData, c, loop, ch, attr, x, y;
+
+    // Convert the bytes to a File() object.
+    file = new File(bytes);
+
+    // Seek to the column setting, and store.
+    file.seek(8);
+    columns = file.get16() + 1;
+
+    // Create the <screenData> based on the column width.
+    imageData = new ScreenData(columns);
+
+    // Seek to the raw image data, and decode based on a run length encoding method.
+    file.seek(12);
+
+    x = 0;
+    y = 0;
+    while (file.getPos() < file.size - 4144) {
+        c = file.get16();
+        if (c === 1) {
+            loop = file.get();
+            file.get();
+            ch = file.get();
+            attr = file.get();
+            while (loop-- > 0) {
+                imageData.set(x++, y, ch, false, attr & 15, attr >> 4);
+                if (x === columns) {
+                    x = 0;
+                    ++y;
+                }
+            }
+        } else {
+            imageData.set(x++, y, c & 255, false, (c >> 8) & 15, c >> 12);
+            if (x === columns) {
+                x = 0;
+                ++y;
+            }
+        }
+    }
+
+    // Decode the font and palette data.
+    imageData.font = Font.font8x16x256(file, options);
+    imageData.palette = Palette.triplets16(file);
+
+    return {
+        "imageData": imageData,
+        "sauce": file.sauce // The SAUCE record.
+    };
+}

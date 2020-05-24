@@ -1,0 +1,91 @@
+function pcb(bytes, options) {
+    var file, loop, charCode, bg, fg, icecolors, x, y, imageData;
+
+    // Convert bytes into a File() object, only for the convenience of later extracting the sauce record.
+    file = new File(bytes);
+    imageData = new ScreenData(80);
+    imageData.font = Font.preset(options.font, options);
+    imageData.palette = Palette.BIN;
+
+    // Reset all colour attributes, <bg> and <fg> and cursor positions, <x> and <y>.
+    bg = 0;
+    fg = 7;
+    x = 0;
+    y = 0;
+
+    // Set <icecolors> depending on the setting of flags in the sauce record
+    if (file.sauce) {
+        icecolors = file.sauce.flags & 1 || options.icecolors;
+    } else {
+        icecolors = options.icecolors;
+    }
+
+    // Convenient function, to insert the current character code, <charCode>, with foreground and background attributes, <fg> and <bg>, at the current cursor position, <x> and <y>.
+    function printChar() {
+        imageData.set(x, y, charCode, false, fg, bg);
+        if (++x === 80) {
+            y++;
+            x = 0;
+        }
+    }
+
+    // Start the image data decoding loop
+    loop = 0;
+    while (loop < file.size) {
+        // <charCode>, the current character under inspection.
+        charCode = bytes[loop];
+
+        // Exit if we encounter an EOF character.
+        if (charCode === 26) {
+            break;
+        }
+
+        switch (charCode) {
+        case 13: // Ignore Carriage Returns <CR>
+            break;
+        case 10: // Linefeed character (LF), start a new line.
+            y++;
+            x = 0;
+            break;
+        case 9: // Horizontal tabs, add spaces.
+            x += 8;
+            break;
+        case 64: // If we have a control code...
+                // ... look ahead to see if it for and attribute change...
+            if (bytes[loop + 1] === 88) {
+                bg = bytes[loop + 2] - ((bytes[loop + 2] >= 65) ? 55 : 48);
+                if (!icecolors && bg > 7) {
+                    bg -= 8;
+                }
+                fg = bytes[loop + 3] - ((bytes[loop + 3] >= 65) ? 55 : 48);
+                loop += 3;
+                // ... or to clear the screen...
+            } else if (bytes[loop + 1] === 67 && bytes[loop + 2] === 76 && bytes[loop + 3] === 83) {
+                x = y = 0;
+                imageData.reset();
+                loop += 4;
+                // ... or to set the cursor position.
+            } else if (bytes[loop + 1] === 80 && bytes[loop + 2] === 79 && bytes[loop + 3] === 83 && bytes[loop + 4] === 58) {
+                if (bytes[loop + 6] === 64) {
+                    x = ((bytes[loop + 5]) - 48) - 1;
+                    loop += 5;
+                } else {
+                    x = (10 * ((bytes[loop + 5]) - 48) + (bytes[loop + 6]) - 48) - 1;
+                    loop += 6;
+                }
+                // Otherwise, treat the control code as a literal.
+            } else {
+                printChar();
+            }
+            break;
+        default: // Handle a literal character.
+            printChar();
+        }
+        loop++;
+    }
+
+    return {
+        "imageData": imageData,
+        "sauce": file.sauce // The sauce record.
+    };
+}

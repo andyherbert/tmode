@@ -1,0 +1,46 @@
+'''TUNDRA''' is one of several systems for expressing text-mode graphics using
+text characters and control characters setting positions and colors. [[ANSI
+Art]] was the main system of this sort, but a few others were invented during
+the BBS era.
+
+The ansilove (and Ansilove-C and ansilove.js) open-source software can display
+TUNDRA among other formats.
+
+== Identification ==
+
+TUNDRA files start with a byte of value 24 (decimal), followed by the ASCII
+string <code>TUNDRA24</code>.
+
+== Format ==
+
+More details of the format can be seen in the Ansilove source code (e.g., the
+function tnd in ansilove.js).
+
+After the header, the file consists of a series of literal text characters (any
+that are not one of the few recognized control characters or the numeric
+parameters following them) and control sequences.
+
+Most numbers are 32-bit unsigned [[Endianness|big-endian]] integers. Color
+palette values are 24-bit RGB arrays.
+
+Characters 1, 2, 4, and 6 (corresponding to Ctrl-A, Ctrl-B, Ctrl-D, and Ctrl-F)
+are the recognized control codes.
+
+Character 1 is followed by two integers (32-bit) setting the new x and y cursor
+positions. 32 bits are rather overkill since these are setting positions on an
+80 x 25 screen.
+
+Character 2 is followed by a 24-bit RGB array to set the foreground color.
+
+Character 4 is followed by a 24-bit RGB array to set the background color.
+
+Character 6 is followed by two 24-bit RGB arrays to set both the foreground and
+background color.
+
+== Software ==
+* [https://www.ansilove.org/ Ansilove]
+
+== Sample files ==
+*
+[http://www.blocktronics.org/downloads/artpacks/blocktronics_block_to_the_future
+.zip blocktronics_block_to_the_future.zip] → TCF....tnd

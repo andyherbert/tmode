@@ -1,0 +1,194 @@
+====== Attribute (Ctrl-A) Codes ======
+//Attribute Codes// (a.k.a. ^A codes) are terminal control sequences embedded
+in Synchronet text and menu display files.
+
+===== Background =====
+Ctrl-A codes are primarily used in place of ANSI X3.64 terminal escape
+sequences to control terminal text attribute (e.g. color) combinations and
+perform some cursor positioning and other advanced features (not available with
+ANSI escape sequences).
+
+The advantage that Ctrl-A codes have over ANSI escape sequences is that they
+are easily stripped out or converted by the [[:server:terminal|Terminal
+Server]] of the BBS software to automatically meet the capabilities of the
+remote user's terminal. There are additional capabilities in Ctrl-A codes that
+go beyond the realm of terminal control and ANSI escape sequences.
+
+The Ctrl-A character was chosen because it's a control character not often
+found in displayable text files or expected to be rendered in a consistent
+manner on all terminals. And "A" is for "Attribute". :-)
+
+Ctrl-A codes may be included in most text files displayed to users of the
+Synchronet [[server:terminal|Terminal Server]] as well as messages posted in
+message bases, extended file descriptions, and other places where some colored
+text can give users the opportunity to better express themselves.
+
+===== Use =====
+Ctrl-A codes are 2-character sequences which begin with a Ctrl-A (ASCII 1)
+character (hence the name) and are followed by a single character (case
+insensitive) which determines the operation to be performed. The only exception
+to this 2-character sequence is the Ctrl-A''"//filename//'' code, which takes a
+filename as an argument and the filename is considered part of the sequence and
+not displayed.
+
+It can sometimes require a special purpose text editor to actually enter a
+Ctrl-A character into a text file. Some editors may require a special key
+sequence or use of a menu option to enter a Ctrl-A character into a file. The
+graphical representation of the character may be a happy face or any other
+non-alphanumeric symbol that the editor chooses to render to represent that
+character code. There are [[atcodes|@-Codes]] for the equivalent of many of the
+Ctrl-A codes, so may consider using them if they are more convenient for your
+text editor of choice.
+
+In the ''[[custom:text.dat]]'' and possibly some other files (e.g.
+[[JavaScript]] and [[:util:Baja]] source files), Ctrl-A characters may be
+included by using the escape sequence ''\1'' (or ''\x01'') rather than having
+to insert an actual control character into the file.
+
+The [[util:ANS2ASC]] utility may be used to convert files encoded with ANSI
+X3.64 terminal escape sequences (e.g. ''*.ans'') into Ctrl-A encoded output and
+the [[util:ASC2ANS]] utility can be used to perform the opposite operation
+(useful for editing Ctrl-A encoded files (e.g. ''*.msg'' or ''*.asc'') with an
+//[[resource:ansi editors|ANSI-BBS screen editor]]//).
+
+===== Colors =====
+
+The following table is a list of //Color Control// Ctrl-A codes and their
+purpose:
+
+^Color	^Foreground^Background^
+|Black  |   ''K''  |   ''0''  |
+|Red    |   ''R''  |   ''1''  |
+|Green  |   ''G''  |   ''2''  |
+|Yellow/Brown |   ''Y''  |   ''3''  |
+|Blue   |   ''B''  |   ''4''  |
+|Magenta|   ''M''  |   ''5''  |
+|Cyan   |   ''C''  |   ''6''  |
+|White/Gray  |   ''W''  |   ''7''  |
+
+===== Attributes =====
+
+The following table is a list of //Attribute Control// Ctrl-A codes, and a
+brief description of each code's usage:
+
+^Attribute ^ Code    ^Description                    ^
+|Bright            |  ''H''  |High Intensity foreground |
+|Blink             |  ''I''  |Blinking (slow), when supported by the terminal |
+|Bright-Background |  ''E''  |High intensity background (so-called iCE colors),
+when supported by the terminal (new in v3.17c) |
+|Blink-Font        |  ''f''  |Set the //Blink// attribute **only** if a
+alternate [[config:fonts.ini|Blink-font]] has been activated in the terminal
+(new in v3.17) |
+|High-Blink-Font   |  ''F''  |Set the //Blink// attribute **only** if a
+alternate [[config:fonts.ini|High-intensity Blink-font]] has been activated in
+the terminal (new in v3.17) |
+|Normal            |  ''N''  |No Special Attributes (Normal, e.g. light-gray) -
+resets both //High// and //Blink// attributes |
+|Optimized Normal  |  ''-''  |Only changes to //normal// if High Intensity,
+Blinking, or Background attribute is set (or pop attributes if pushed)|
+|Optimized Normal  |  ''_''  |Only changes to //normal// if the Blinking or
+Background attribute is set |
+
+==== High Intensity and Blink ====
+The //High Intensity// console attribute behaves as it does with ANSI
+terminals: that is, once enabled, the current color and any subsequent new
+colors will be rendered in their "high intensity" (bright) version. To revert
+to normal/dark colors, a //Normal// (or //Optimized Normal//) Ctrl-A code must
+be specified. The //Normal// attribute code will reset both the //High
+Intensity// and the current color - back to the default, "light gray".
+
+The //Blink// console attribute behaves similarly: once set, all newly-printed
+characters will have the blink attribute until a //Normal// attribute code is
+encountered.
+===== Control =====
+
+The following table is a list of //Terminal Control// Ctrl-A codes, and a brief
+description of each code's usage:
+
+^ Operation     ^   Code   ^ Description                    ^
+|Pause          |  ''P''   |Display a Pause (e.g. [Hit a key]) Prompt|
+|Pause Reset    |  ''Q''   |Reset the line counter for the auto screen-pause
+function|
+|Delay          |  '',''   |Delay for one tenth of a second|
+|Delay          |  '';''   |Delay for one half second|
+|Delay          |  ''.''   |Delay for two seconds|
+|Cls            |  ''L''   |Clear the screen, clear any existing mouse
+hot-spots, and home the cursor |
+|Home           |  '''''   |Home the cursor (without necessarily clearing the
+screen, used to be ''`'')|
+|Hungry-hotspot |  ''~''   |Precedes a single-character hungry mouse hot-spot
+command (CR if next character is a ctrl char or end of string) |
+|Strict-hotspot |  ''`''   |Precedes a single-character strict mouse hot-spot
+command (or "Home" if next character is a ctrl char or end of string) |
+|Clreos         |  ''J''   |Clear to end of screen (leave cursor in current
+position)|
+|Clreol         |  ''>''   |Clear to end of line (leave cursor in current
+position)|
+|Bckspc         |  ''<''   |Send a non-destructive backspace character (Ctrl-H)
+- Cursor Left|
+|CR             |  ''[''   |Send a carriage return character (Ctrl-M) - Cursor
+to Beginning of Line|
+|LF             |  '']''   |Send a line feed character (Ctrl-J) - Cursor Down|
+|Cond-Newline   |  ''/''   |Send a new-line sequence (CRLF) **only** when the
+cursor is not already in the first column (new in v3.17) |
+|Cond-Linecont  |  ''\''   |Send a line-continuation sequence
+(''[[custom:text.dat]]'' //LongLineContinuationPrefix// line) if terminal < 80
+columns |
+|Cond-Blankline |  ''?''   |Send a blank-line sequence **only** when the
+previously printed line was not blank (new in v3.17) |
+|Push Attr      |  ''+''   |Save current attributes into (server-side)
+attribute LIFO stack|
+|Pop Attr       |  ''-''   |Restore attributes from stack (or Optimized Normal,
+if no attributes saved/pushed)|
+|SOH            |  ''A''   |Send an actual Ctrl-A (ASCII 1) character|
+|SUB            |  ''z''   |Send an actual Ctrl-Z (ASCII 26) character (note:
+lowercase 'z' only v3.17c and later) |
+|EOF            |  ''Z''   |Premature end-of-file (note: uppercase 'Z' only in
+v3.17c and later) |
+|Cursor Right   |  128-255 |Move cursor to the right (code-127) characters|
+
+===== Macros =====
+
+The following table is a list of //Macro// Ctrl-A codes, and a brief
+description of each code's usage:
+
+^Macro    ^ Code    ^Description                    ^
+|Date     |  ''D''  |Display the current system date (in "MM/DD/YY" or
+"DD/MM/YY" format)|
+|Time     |  ''T''  |Display the current system time (in "HH:MM am" or
+"HH:MM:SS" format)|
+
+===== Advanced =====
+
+The following table is a list of //Advanced// Ctrl-A codes, and a brief
+description of each code's usage:
+
+^Operation^ Code    ^Description                          ^
+|Sync     |  ''S''  |Synchronize node status and output with terminal (i.e.
+initiates a call to ''nodesync()'')|
+|Embed File| ''%%"%%//filename//''| Display contents of //filename// from the
+Terminal Server's ''[[dir:text]]'' directory|
+
+===== Security =====
+
+Synchronet also supports //Secure Control// Ctrl-A codes which may be used to
+hide text from users
+not meeting certain security criteria (i.e.: Security Level or Flags from Flag
+Set #1).
+
+The following table is a list of Security Control Ctrl-A codes, and a brief
+description of each code's usage:
+
+^Code		   ^Description^
+|Ctrl-A thru Ctrl-Z|Only display the following text to users with the
+corresponding flag A through Z turned on (from Flag Set #1)|
+|''!''|Toggle the text display off/on for users of less than level 10|
+|''@''|Toggle the text display off/on for users of less than level 20|
+|''#''|Toggle the text display off/on for users of less than level 30|
+|''$''|Toggle the text display off/on for users of less than level 40|
+|''%''|Toggle the text display off/on for users of less than level 50|
+|''^''|Toggle the text display off/on for users of less than level 60|
+|''&''|Toggle the text display off/on for users of less than level 70|
+|''*''|Toggle the text display off/on for users of less than level 80|
+|''(''|Toggle the text display off/on for users of less than level 90|
+|'')''|Restore the displaying of text to ALL users|

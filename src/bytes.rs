@@ -32,9 +32,9 @@ impl std::fmt::Display for BytesError {
 impl Error for BytesError {}
 
 pub trait VecOps<T> {
-    fn strip_trailing_value(&self, value: T) -> Vec<T>;
-    fn strip_trailing_spaces(&self) -> Vec<T>;
-    fn strip_trailing_null(&self) -> Vec<T>;
+    fn strip_trailing_value(&mut self, value: T) -> &Vec<T>;
+    fn strip_trailing_spaces(&mut self) -> &Vec<T>;
+    fn strip_trailing_null(&mut self) -> &Vec<T>;
     fn pad_with_value(&mut self, length: usize, value: T) -> &Self;
     fn pad_with_spaces(&mut self, length: usize) -> &Self;
     fn pad_with_null(&mut self, length: usize) -> &Self;
@@ -50,23 +50,22 @@ pub trait PackToBytes {
 }
 
 impl VecOps<u8> for Vec<u8> {
-    fn strip_trailing_value(&self, value: u8) -> Vec<u8> {
-        let mut vec = self.to_vec();
-        while let Some(last) = vec.last() {
+    fn strip_trailing_value(&mut self, value: u8) -> &Vec<u8> {
+        while let Some(last) = self.last() {
             if *last == value {
-                vec.pop();
+                self.pop();
             } else {
                 break;
             }
         }
-        vec
+        self
     }
 
-    fn strip_trailing_spaces(&self) -> Vec<u8> {
+    fn strip_trailing_spaces(&mut self) -> &Vec<u8> {
         self.strip_trailing_value(ascii::SPACE)
     }
 
-    fn strip_trailing_null(&self) -> Vec<u8> {
+    fn strip_trailing_null(&mut self) -> &Vec<u8> {
         self.strip_trailing_value(ascii::NULL)
 
     }

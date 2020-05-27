@@ -11,6 +11,7 @@ use serde::Serialize;
 
 #[derive(Default, Serialize)]
 pub struct Sauce {
+    file: Option<String>,
     title: String,
     author: String,
     group: String,
@@ -38,7 +39,9 @@ impl Sauce {
 
     pub fn from_file(file: &str) -> Result<Sauce, Box<dyn Error>> {
         let bytes = read_file_to_bytes(file)?;
-        Ok(Sauce::from_bytes(&bytes)?)
+        let mut sauce = Sauce::from_bytes(&bytes)?;
+        sauce.file = Some(file.to_string());
+        Ok(sauce)
     }
 
     pub fn from_stdin() -> Result<Sauce, Box<dyn Error>> {
@@ -168,14 +171,11 @@ impl Sauce {
             let mut comments = String::new();
             for i in 0..lines_of_comments {
                 let comment_start = 5 + i * 64;
-                let vec = comments_bytes[comment_start..comment_start + 64].to_vec();
+                let mut vec = comments_bytes[comment_start..comment_start + 64].to_vec();
                 if i == lines_of_comments - 1 {
                     vec.strip_trailing_spaces();
                 }
-                match String::from_utf8(vec.clone()) {
-                    Ok(string) => comments.push_str(&string),
-                    Err(_) => comments.push_str(&String::from_cp437_bytes(&vec)),
-                }
+                comments.push_str(&String::from_cp437_bytes(&vec));
             }
             sauce.comments = Some(comments);
         } else {
@@ -189,6 +189,10 @@ impl Sauce {
 
 impl std::fmt::Display for Sauce {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        match &self.file {
+            Some(file) => writeln!(f, "file: {}", file)?,
+            None => writeln!(f, "file: None")?,
+        }
         writeln!(f, "title: {}", self.title)?;
         writeln!(f, "author: {}", self.author)?;
         writeln!(f, "group: {}", self.group)?;

@@ -2,7 +2,7 @@ use clap::{App, Arg};
 use clap::{crate_name, crate_version, crate_description, crate_authors};
 use std::fs::File;
 use std::io::{stdin, Read, BufReader};
-use textmode::sauce;
+use textmode::sauce::Sauce;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let app = App::new(crate_name!())
@@ -29,19 +29,19 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         stdin().read_to_end(&mut bytes)?;
     }
     if matches.is_present("sauce") {
-        if let Some(sauce) = sauce::parse_bytes(&bytes) {
-            println!("{}", sauce);
-        } else {
-            println!("No SAUCE record found.");
+        match Sauce::from_bytes(&bytes) {
+            Ok(sauce) => {
+                println!("{}", sauce);
+                let bytes = sauce.to_bytes()?;
+                println!("{}", Sauce::from_bytes(&bytes)?);
+            },
+            Err(e) => eprintln!("{}", e),
         }
     }
     if matches.is_present("sauce_json") {
-        if let Some(sauce) = sauce::parse_bytes(&bytes) {
-            if let Ok(json) = sauce.to_json() {
-                println!("{}", json);
-            }
-        } else {
-            println!("No SAUCE record found.");
+        match Sauce::from_bytes(&bytes) {
+            Ok(sauce) => println!("{}", sauce.to_json()?),
+            Err(e) => eprintln!("{}", e),
         }
     }
     Ok(())

@@ -19,6 +19,7 @@ pub struct Sauce {
     month: String,
     date: String,
     filesize: usize,
+    actual_filesize: usize,
     datatype: Option<DataType>,
     filetype: Option<FileType>,
     type_info_1: usize,
@@ -44,9 +45,28 @@ impl Sauce {
         Ok(sauce)
     }
 
+    pub fn remove_from_bytes(bytes: &[u8]) -> Result<Vec<u8>, Box<dyn Error>> {
+        let sauce = Sauce::from_bytes(&bytes)?;
+        Ok(bytes[0..sauce.actual_filesize].to_vec())
+    }
+
+    pub fn remove_from_file(file: &str) -> Result<(), Box<dyn Error>> {
+        let bytes = read_file_to_bytes(file)?;
+        let bytes = Sauce::remove_from_bytes(&bytes)?;
+        write_bytes_to_file(&bytes, file)?;
+        Ok(())
+    }
+
     pub fn from_stdin() -> Result<Sauce, Box<dyn Error>> {
         let bytes = read_stdin_to_bytes()?;
         Ok(Sauce::from_bytes(&bytes)?)
+    }
+
+    pub fn remove_from_stdin() -> Result<(), Box<dyn Error>> {
+        let bytes = read_stdin_to_bytes()?;
+        let bytes = Sauce::remove_from_bytes(&bytes)?;
+        write_bytes_to_stdin(&bytes)?;
+        Ok(())
     }
 
     pub fn to_json(&self) -> serde_json::Result<String> {
@@ -114,7 +134,7 @@ impl Sauce {
         Ok(bytes.to_vec())
     }
 
-    pub fn from_bytes(bytes: &Vec<u8>) -> Result<Sauce, Box<dyn Error>> {
+    pub fn from_bytes(bytes: &[u8]) -> Result<Sauce, Box<dyn Error>> {
         let mut sauce = Sauce::new();
         if bytes.len() < 129 {
             return Err(Box::new(SauceError::SauceNotFound));
@@ -158,12 +178,12 @@ impl Sauce {
             if bytes.len() < 134 + lines_of_comments * 64 {
                 return Err(Box::new(SauceError::CommentsNotFound));
             }
-            if bytes[bytes.len() - 134 - lines_of_comments * 64] != ascii::EOF {
+            sauce.actual_filesize = bytes.len() - lines_of_comments * 64 - 134;
+            if bytes[sauce.actual_filesize] != ascii::EOF {
                 return Err(Box::new(SauceError::EOFValueNotFound));
             }
-            let comments_start = bytes.len() - lines_of_comments * 64 - 133;
             let comments_end = bytes.len() - 128;
-            let comments_bytes = &bytes[comments_start..comments_end];
+            let comments_bytes = &bytes[sauce.actual_filesize + 1..comments_end];
             let comment_id = String::from_cp437_bytes(&comments_bytes[0..=4].to_vec());
             if comment_id != "COMNT" {
                 return Err(Box::new(SauceError::CommentsNotFound));
@@ -179,7 +199,8 @@ impl Sauce {
             }
             sauce.comments = Some(comments);
         } else {
-            if bytes[bytes.len() - 129] != ascii::EOF {
+            sauce.actual_filesize = bytes.len() - 129;
+            if bytes[sauce.actual_filesize] != ascii::EOF {
                 return Err(Box::new(SauceError::EOFValueNotFound));
             }
         }
@@ -200,6 +221,7 @@ impl std::fmt::Display for Sauce {
         writeln!(f, "month: {}", self.month)?;
         writeln!(f, "date: {}", self.date)?;
         writeln!(f, "filesize: {}", self.filesize)?;
+        writeln!(f, "actual filesize: {}", self.actual_filesize)?;
         match &self.datatype {
             Some(datatype) => writeln!(f, "datatype: {}", datatype)?,
             None => writeln!(f, "datatype: None")?,

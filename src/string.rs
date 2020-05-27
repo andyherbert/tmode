@@ -6,7 +6,7 @@ pub trait CP437Char {
 }
 
 pub trait CP437String {
-    fn from_cp437_bytes(bytes: &Vec<u8>) -> String;
+    fn from_cp437_bytes(bytes: &[u8]) -> String;
     fn as_cp437_bytes(&self) -> Vec<u8>;
 }
 
@@ -356,7 +356,7 @@ impl CP437String for String {
         bytes
     }
 
-    fn from_cp437_bytes(bytes: &Vec<u8>) -> String {
+    fn from_cp437_bytes(bytes: &[u8]) -> String {
         let mut string = String::new();
         for byte in bytes {
             let c = char::from_cp437_byte(*byte);

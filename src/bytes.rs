@@ -1,4 +1,20 @@
 use crate::ascii;
+use std::io::{stdin, Read};
+use std::fs::File;
+use std::error::Error;
+
+pub fn read_file_to_bytes(file: &str) -> Result<Vec<u8>, Box<dyn Error>> {
+    let mut bytes = Vec::new();
+    let mut file = File::open(file)?;
+    file.read_to_end(&mut bytes)?;
+    Ok(bytes)
+}
+
+pub fn read_stdin_to_bytes() -> Result<Vec<u8>, Box<dyn Error>> {
+    let mut bytes = Vec::new();
+    stdin().read_to_end(&mut bytes)?;
+    Ok(bytes)
+}
 
 #[derive(Debug)]
 pub enum BytesError {
@@ -13,7 +29,7 @@ impl std::fmt::Display for BytesError {
     }
 }
 
-impl std::error::Error for BytesError {}
+impl Error for BytesError {}
 
 pub trait VecOps<T> {
     fn strip_trailing_value(&self, value: T) -> Vec<T>;
@@ -22,7 +38,7 @@ pub trait VecOps<T> {
     fn pad_with_value(&mut self, length: usize, value: T) -> &Self;
     fn pad_with_spaces(&mut self, length: usize) -> &Self;
     fn pad_with_null(&mut self, length: usize) -> &Self;
-    fn write_to_slice(&self, slice: &mut [u8]) -> Result<(), Box<dyn std::error::Error>>;
+    fn write_to_slice(&self, slice: &mut [u8]) -> Result<(), Box<dyn Error>>;
 }
 
 pub trait AsUSize {
@@ -70,7 +86,7 @@ impl VecOps<u8> for Vec<u8> {
         self.pad_with_value(length, ascii::NULL)
     }
 
-    fn write_to_slice(&self, bytes: &mut [u8]) -> Result<(), Box<dyn std::error::Error>> {
+    fn write_to_slice(&self, bytes: &mut [u8]) -> Result<(), Box<dyn Error>> {
         if self.len() > bytes.len() {
             return Err(Box::new(BytesError::TooLarge));
         }

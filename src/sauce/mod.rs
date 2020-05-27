@@ -36,12 +36,22 @@ impl Sauce {
         Default::default()
     }
 
+    pub fn from_file(file: &str) -> Result<Sauce, Box<dyn Error>> {
+        let bytes = read_file_to_bytes(file)?;
+        Ok(Sauce::from_bytes(&bytes)?)
+    }
+
+    pub fn from_stdin() -> Result<Sauce, Box<dyn Error>> {
+        let bytes = read_stdin_to_bytes()?;
+        Ok(Sauce::from_bytes(&bytes)?)
+    }
+
     pub fn to_json(&self) -> serde_json::Result<String> {
         let json = serde_json::to_string_pretty(&self)?;
         Ok(json)
     }
 
-    pub fn to_bytes(&self) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
+    pub fn to_bytes(&self) -> Result<Vec<u8>, Box<dyn Error>> {
         let mut bytes = Vec::new();
         bytes.push(ascii::EOF);
         let mut comments_length = 0;
@@ -101,7 +111,7 @@ impl Sauce {
         Ok(bytes.to_vec())
     }
 
-    pub fn from_bytes(bytes: &Vec<u8>) -> Result<Sauce, Box<dyn std::error::Error>> {
+    pub fn from_bytes(bytes: &Vec<u8>) -> Result<Sauce, Box<dyn Error>> {
         let mut sauce = Sauce::new();
         if bytes.len() < 129 {
             return Err(Box::new(SauceError::SauceNotFound));
@@ -110,7 +120,7 @@ impl Sauce {
         let sauce_bytes = &bytes[sauce_start..];
         let id = String::from_cp437_bytes(&sauce_bytes[0..=6].to_vec());
         if id != "SAUCE00" {
-            return Err(Box::new(SauceError::UnexpectedVersionNumber));
+            return Err(Box::new(SauceError::SauceNotFound));
         }
         sauce.title = String::from_cp437_bytes(&sauce_bytes[7..=41].to_vec().strip_trailing_spaces());
         sauce.author = String::from_cp437_bytes(&sauce_bytes[42..=61].to_vec().strip_trailing_spaces());

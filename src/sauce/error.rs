@@ -1,8 +1,9 @@
+pub use std::error::Error;
+
 #[derive(Debug)]
 pub enum SauceError {
     SauceNotFound,
     EOFValueNotFound,
-    UnexpectedVersionNumber,
     InvalidDataType,
     InvalidFileType,
     CommentsNotFound,
@@ -16,7 +17,6 @@ impl std::fmt::Display for SauceError {
         match self {
             SauceError::SauceNotFound => writeln!(f, "Sauce not found"),
             SauceError::EOFValueNotFound => writeln!(f, "EOF value not found"),
-            SauceError::UnexpectedVersionNumber => writeln!(f, "Unexpected version number"),
             SauceError::InvalidDataType => writeln!(f, "Invalid datatype"),
             SauceError::InvalidFileType => writeln!(f, "Invalid filetype"),
             SauceError::CommentsNotFound => writeln!(f, "Comments not found"),
@@ -27,4 +27,4 @@ impl std::fmt::Display for SauceError {
     }
 }
 
-impl std::error::Error for SauceError {}
+impl Error for SauceError {}

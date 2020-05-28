@@ -7,11 +7,11 @@ use error::*;
 use crate::string::*;
 use crate::bytes::*;
 use crate::ascii;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
-#[derive(Default, Serialize)]
+#[derive(Default, Deserialize, Serialize)]
 pub struct Sauce {
-    file: Option<String>,
+    pub file: Option<String>,
     pub title: String,
     pub author: String,
     pub group: String,

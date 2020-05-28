@@ -1,8 +1,8 @@
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 pub use std::str::FromStr;
 use super::error::*;
 
-#[derive(Serialize)]
+#[derive(Deserialize, Serialize)]
 pub enum DataType {
     Character,
     Bitmap,

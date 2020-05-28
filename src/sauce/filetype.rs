@@ -1,10 +1,10 @@
 use regex::Regex;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use crate::sauce::DataType;
 pub use std::str::FromStr;
 use super::error::*;
 
-#[derive(Serialize)]
+#[derive(Deserialize, Serialize)]
 pub enum FileType {
     ASCII,
     ANSI,

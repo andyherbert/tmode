@@ -303,8 +303,8 @@ pub fn sauce_options(matches: &ArgMatches) -> Result<(), Box<dyn Error>> {
             }
         }
     }
-    if matches.is_present("date") {
-        if let Some(date) = matches.value_of("date") {
+    if matches.is_present("day") {
+        if let Some(date) = matches.value_of("day") {
             for file in matches.values_of("FILE").expect("Error: No input files") {
                 match Sauce::from_file(file) {
                     Ok(sauce) => {
@@ -313,7 +313,7 @@ pub fn sauce_options(matches: &ArgMatches) -> Result<(), Box<dyn Error>> {
                                 Ok(date) => {
                                     sauce.date = format!("{:02}", date);
                                     match sauce.add_to_file(file) {
-                                        Ok(_) => println!("{}: Added date", file),
+                                        Ok(_) => println!("{}: Added day", file),
                                         Err(e) => eprintln!("{}: {}", file, e),
                                     }
                                 },
@@ -390,8 +390,8 @@ pub fn sauce_options(matches: &ArgMatches) -> Result<(), Box<dyn Error>> {
             }
         }
     }
-    if matches.is_present("csv_file") {
-        if let Some(file) = matches.value_of("csv_file") {
+    if matches.is_present("export_csv") {
+        if let Some(file) = matches.value_of("export_csv") {
             let mut wtr = csv::Writer::from_path(file)?;
             for file in matches.values_of("FILE").expect("Error: No input files") {
                 match Sauce::from_file(file) {
@@ -406,8 +406,8 @@ pub fn sauce_options(matches: &ArgMatches) -> Result<(), Box<dyn Error>> {
             wtr.flush()?;
         }
     }
-    if matches.is_present("json_file") {
-        if let Some(file) = matches.value_of("json_file") {
+    if matches.is_present("export_json") {
+        if let Some(file) = matches.value_of("export_json") {
             let mut vec = Vec::new();
             for file in matches.values_of("FILE").expect("Error: No input files") {
                 match Sauce::from_file(file) {
@@ -437,8 +437,8 @@ pub fn sauce_options(matches: &ArgMatches) -> Result<(), Box<dyn Error>> {
             }
         }
     }
-    if matches.is_present("import_csv") {
-        if let Some(file) = matches.value_of("import_csv") {
+    if matches.is_present("import csv") {
+        if let Some(file) = matches.value_of("import csv") {
             let mut rdr = csv::Reader::from_path(file)?;
             for result in rdr.deserialize() {
                 let mut sauce: Sauce = result?;
@@ -468,77 +468,97 @@ fn main() -> Result<(), Box<dyn Error>> {
         .long("sauce")
         .requires("FILE")
         .help("Displays SAUCE information."))
-    .arg(Arg::with_name("csv_file")
-        .long("csv")
+    .arg(Arg::with_name("export_csv")
+        .long("export-csv")
         .takes_value(true)
+        .value_name("CSV FILE")
+        .require_equals(true)
         .requires("FILE")
-        .help("Writes SAUCE information to a CSV file."))
-    .arg(Arg::with_name("import_csv")
+        .help("Exports multiple SAUCE records to a CSV file."))
+    .arg(Arg::with_name("import csv")
         .long("import-csv")
         .takes_value(true)
-        .help("Writes a CSV file with multiple SAUCE records."))
+        .value_name("CSV FILE")
+        .require_equals(true)
+        .help("Imports a CSV file to update multiple SAUCE records."))
     .arg(Arg::with_name("filetype")
         .long("filetype")
         .requires("FILE")
         .help("Automatically insert a SAUCE record for non-textmode files."))
-    .arg(Arg::with_name("json_file")
-        .long("json")
+    .arg(Arg::with_name("export_json")
+        .long("export-json")
         .takes_value(true)
+        .value_name("JSON FILE")
+        .require_equals(true)
         .requires("FILE")
-        .help("Writes a JSON file with multiple SAUCE records."))
+        .help("Exports multiple SAUCE records to a JSON file."))
     .arg(Arg::with_name("import_json")
         .long("import-json")
         .takes_value(true)
-        .help("Reads a JSON file to update multiple SAUCE records."))
+        .value_name("JSON FILE")
+        .require_equals(true)
+        .help("Imports a JSON file to update multiple SAUCE records."))
     .arg(Arg::with_name("sauce_remove")
         .short("r")
         .long("sauce-remove")
         .requires("FILE")
-        .help("Removes SAUCE record."))
+        .help("Removes SAUCE records."))
     .arg(Arg::with_name("title")
         .long("title")
         .takes_value(true)
+        .require_equals(true)
         .requires("FILE")
-        .help("Adds a title to the SAUCE record."))
+        .help("Adds a title to the SAUCE records."))
     .arg(Arg::with_name("author")
         .long("author")
         .takes_value(true)
+        .value_name("author's name")
+        .require_equals(true)
         .requires("FILE")
-        .help("Adds a author to the SAUCE record."))
+        .help("Adds an author to SAUCE records."))
     .arg(Arg::with_name("group")
         .long("group")
         .takes_value(true)
+        .value_name("group's name")
+        .require_equals(true)
         .requires("FILE")
-        .help("Adds a group to the SAUCE record."))
+        .help("Adds a group to SAUCE records."))
     .arg(Arg::with_name("year")
         .long("year")
         .takes_value(true)
+        .require_equals(true)
         .requires("FILE")
-        .help("Adds a year to the SAUCE record."))
+        .help("Adds a year to SAUCE records."))
     .arg(Arg::with_name("month")
         .long("month")
         .takes_value(true)
+        .require_equals(true)
         .requires("FILE")
-        .help("Adds a month to the SAUCE record."))
-    .arg(Arg::with_name("date")
-        .long("date")
+        .help("Adds a month to SAUCE records."))
+    .arg(Arg::with_name("day")
+        .long("day")
         .takes_value(true)
+        .value_name("day of month")
+        .require_equals(true)
         .requires("FILE")
-        .help("Adds a date of the month to the SAUCE record."))
+        .help("Adds a day of the month to SAUCE records."))
     .arg(Arg::with_name("current_date")
         .long("current-date")
         .requires("FILE")
-        .help("Adds the current date to the SAUCE record."))
+        .help("Adds the current local date to SAUCE records."))
     .arg(Arg::with_name("font")
         .long("font")
         .takes_value(true)
+        .value_name("font name")
+        .require_equals(true)
         .requires("FILE")
-        .help("Adds a font name to the SAUCE record."))
+        .help("Adds a font name to SAUCE records."))
     .arg(Arg::with_name("comments")
         .long("comments")
         .takes_value(true)
+        .require_equals(true)
         .requires("FILE")
-        .help("Adds comments to the SAUCE record."))
+        .help("Adds comments to SAUCE records."))
     .arg(Arg::with_name("no_sauce")
         .long("no-sauce")
         .requires("FILE")

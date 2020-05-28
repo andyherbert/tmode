@@ -2,7 +2,6 @@ pub use std::error::Error;
 
 #[derive(Debug)]
 pub enum SauceError {
-    SauceNotFound,
     EOFValueNotFound,
     InvalidDataType,
     InvalidFileType,
@@ -15,7 +14,6 @@ pub enum SauceError {
 impl std::fmt::Display for SauceError {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
-            SauceError::SauceNotFound => writeln!(f, "Sauce not found"),
             SauceError::EOFValueNotFound => writeln!(f, "EOF value not found"),
             SauceError::InvalidDataType => writeln!(f, "Invalid datatype"),
             SauceError::InvalidFileType => writeln!(f, "Invalid filetype"),

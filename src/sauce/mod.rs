@@ -1,8 +1,8 @@
 mod datatype;
 mod filetype;
 mod error;
-use datatype::*;
-use filetype::*;
+pub use datatype::*;
+pub use filetype::*;
 use error::*;
 use crate::string::*;
 use crate::bytes::*;
@@ -12,42 +12,48 @@ use serde::Serialize;
 #[derive(Default, Serialize)]
 pub struct Sauce {
     file: Option<String>,
-    title: String,
-    author: String,
-    group: String,
-    year: String,
-    month: String,
-    date: String,
+    pub title: String,
+    pub author: String,
+    pub group: String,
+    pub year: String,
+    pub month: String,
+    pub date: String,
     filesize: usize,
     actual_filesize: usize,
-    datatype: Option<DataType>,
-    filetype: Option<FileType>,
-    type_info_1: usize,
-    type_info_2: usize,
-    type_info_3: usize,
-    type_info_4: usize,
-    ice_colors: bool,
-    letter_spacing: Option<bool>,
-    modern_aspect_ratio: Option<bool>,
-    font_name: String,
-    comments: Option<String>,
+    pub datatype: Option<DataType>,
+    pub filetype: Option<FileType>,
+    pub type_info_1: usize,
+    pub type_info_2: usize,
+    pub type_info_3: usize,
+    pub type_info_4: usize,
+    pub ice_colors: bool,
+    pub letter_spacing: Option<bool>,
+    pub modern_aspect_ratio: Option<bool>,
+    pub font_name: String,
+    pub comments: Option<String>,
 }
 
 impl Sauce {
-    fn new() -> Sauce {
+    pub fn new() -> Sauce {
         Default::default()
     }
 
-    pub fn from_file(file: &str) -> Result<Sauce, Box<dyn Error>> {
+    pub fn from_file(file: &str) -> Result<Option<Sauce>, Box<dyn Error>> {
         let bytes = read_file_to_bytes(file)?;
-        let mut sauce = Sauce::from_bytes(&bytes)?;
-        sauce.file = Some(file.to_string());
-        Ok(sauce)
+        if let Some(mut sauce) = Sauce::from_bytes(&bytes)? {
+            sauce.file = Some(file.to_string());
+            Ok(Some(sauce))
+        } else {
+            Ok(None)
+        }
     }
 
     pub fn remove_from_bytes(bytes: &[u8]) -> Result<Vec<u8>, Box<dyn Error>> {
-        let sauce = Sauce::from_bytes(&bytes)?;
-        Ok(bytes[0..sauce.actual_filesize].to_vec())
+        if let Some(sauce) = Sauce::from_bytes(&bytes)? {
+            Ok(bytes[0..sauce.actual_filesize].to_vec())
+        } else {
+            Ok(bytes.to_vec())
+        }
     }
 
     pub fn remove_from_file(file: &str) -> Result<(), Box<dyn Error>> {
@@ -57,7 +63,26 @@ impl Sauce {
         Ok(())
     }
 
-    pub fn from_stdin() -> Result<Sauce, Box<dyn Error>> {
+    pub fn add_to_bytes(&mut self, bytes: &mut Vec<u8>) -> Result<(), Box<dyn Error>> {
+        if let Some(sauce) = Sauce::from_bytes(&bytes)? {
+            bytes.resize(sauce.actual_filesize, 0);
+            self.filesize = sauce.actual_filesize;
+        } else {
+            self.filesize = bytes.len();
+        }
+        let mut sauce_bytes = self.to_bytes()?;
+        bytes.append(&mut sauce_bytes);
+        Ok(())
+    }
+
+    pub fn add_to_file(&mut self, file: &str) -> Result<(), Box<dyn Error>> {
+        let mut bytes = read_file_to_bytes(file)?;
+        self.add_to_bytes(&mut bytes)?;
+        write_bytes_to_file(&bytes, file)?;
+        Ok(())
+    }
+
+    pub fn from_stdin() -> Result<Option<Sauce>, Box<dyn Error>> {
         let bytes = read_stdin_to_bytes()?;
         Ok(Sauce::from_bytes(&bytes)?)
     }
@@ -134,16 +159,16 @@ impl Sauce {
         Ok(bytes.to_vec())
     }
 
-    pub fn from_bytes(bytes: &[u8]) -> Result<Sauce, Box<dyn Error>> {
+    pub fn from_bytes(bytes: &[u8]) -> Result<Option<Sauce>, Box<dyn Error>> {
         let mut sauce = Sauce::new();
         if bytes.len() < 129 {
-            return Err(Box::new(SauceError::SauceNotFound));
+            return Ok(None);
         }
         let sauce_start = bytes.len() - 128;
         let sauce_bytes = &bytes[sauce_start..];
         let id = String::from_cp437_bytes(&sauce_bytes[0..=6].to_vec());
         if id != "SAUCE00" {
-            return Err(Box::new(SauceError::SauceNotFound));
+            return Ok(None);
         }
         sauce.title = String::from_cp437_bytes(&sauce_bytes[7..=41].to_vec().strip_trailing_spaces());
         sauce.author = String::from_cp437_bytes(&sauce_bytes[42..=61].to_vec().strip_trailing_spaces());
@@ -204,7 +229,7 @@ impl Sauce {
                 return Err(Box::new(SauceError::EOFValueNotFound));
             }
         }
-        Ok(sauce)
+        Ok(Some(sauce))
     }
 }
 

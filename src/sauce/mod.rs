@@ -82,18 +82,6 @@ impl Sauce {
         Ok(())
     }
 
-    pub fn from_stdin() -> Result<Option<Sauce>, Box<dyn Error>> {
-        let bytes = read_stdin_to_bytes()?;
-        Ok(Sauce::from_bytes(&bytes)?)
-    }
-
-    pub fn remove_from_stdin() -> Result<(), Box<dyn Error>> {
-        let bytes = read_stdin_to_bytes()?;
-        let bytes = Sauce::remove_from_bytes(&bytes)?;
-        write_bytes_to_stdin(&bytes)?;
-        Ok(())
-    }
-
     pub fn to_json(&self) -> serde_json::Result<String> {
         let json = serde_json::to_string_pretty(&self)?;
         Ok(json)

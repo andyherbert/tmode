@@ -1,5 +1,5 @@
 use crate::ascii;
-use std::io::{stdin, stdout, Read, Write, BufReader, BufWriter};
+use std::io::{Read, Write, BufReader, BufWriter};
 use std::fs::File;
 use std::error::Error;
 
@@ -16,17 +16,6 @@ pub fn write_bytes_to_file(bytes: &[u8], file: &str) -> Result<(), Box<dyn Error
     let mut buffer = BufWriter::new(file);
     buffer.write_all(&bytes)?;
     buffer.flush()?;
-    Ok(())
-}
-
-pub fn read_stdin_to_bytes() -> Result<Vec<u8>, Box<dyn Error>> {
-    let mut bytes = Vec::new();
-    stdin().read_to_end(&mut bytes)?;
-    Ok(bytes)
-}
-
-pub fn write_bytes_to_stdin(bytes: &[u8]) -> Result<(), Box<dyn Error>> {
-    stdout().write_all(&bytes)?;
     Ok(())
 }
 

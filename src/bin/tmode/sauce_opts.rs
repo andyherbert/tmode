@@ -1,4 +1,4 @@
-use textmode::{Sauce, sauce::DataType, sauce::FileType};
+use textmode::{Sauce, sauce::DataType, sauce::FileType, sauce::AspectRatio, sauce::LetterSpacing};
 use std::error::Error;
 use std::path::Path;
 use chrono::{Datelike, Local};
@@ -34,8 +34,8 @@ fn filetype(values: Option<Values>) -> Result<(), Box<dyn Error>> {
                                         };
                                         sauce.datatype = Some(DataType::Bitmap);
                                         sauce.filetype = Some(FileType::GIF);
-                                        sauce.type_info_1 = width as usize;
-                                        sauce.type_info_2 = height as usize;
+                                        sauce.info_1 = width as usize;
+                                        sauce.info_2 = height as usize;
                                         match sauce.add_to_file(file) {
                                             Ok(_) => println!("{}: Added filetype Bitmap/GIF ({}x{})", file, width, height),
                                             Err(e) => eprintln!("{}: {}", file, e),
@@ -75,8 +75,8 @@ fn filetype(values: Option<Values>) -> Result<(), Box<dyn Error>> {
                                         };
                                         sauce.datatype = Some(DataType::Bitmap);
                                         sauce.filetype = Some(FileType::JPG);
-                                        sauce.type_info_1 = width as usize;
-                                        sauce.type_info_2 = height as usize;
+                                        sauce.info_1 = width as usize;
+                                        sauce.info_2 = height as usize;
                                         match sauce.add_to_file(file) {
                                             Ok(_) => println!("{}: Added filetype Bitmap/JPG ({}x{})", file, width, height),
                                             Err(e) => eprintln!("{}: {}", file, e),
@@ -132,8 +132,8 @@ fn filetype(values: Option<Values>) -> Result<(), Box<dyn Error>> {
                                         };
                                         sauce.datatype = Some(DataType::Bitmap);
                                         sauce.filetype = Some(FileType::PNG);
-                                        sauce.type_info_1 = width as usize;
-                                        sauce.type_info_2 = height as usize;
+                                        sauce.info_1 = width as usize;
+                                        sauce.info_2 = height as usize;
                                         match sauce.add_to_file(file) {
                                             Ok(_) => println!("{}: Added filetype Bitmap/PNG ({}x{})", file, width, height),
                                             Err(e) => eprintln!("{}: {}", file, e),
@@ -340,6 +340,219 @@ fn day(values: Option<Values>, day: Option<&str>) -> Result<(), Box<dyn Error>> 
     Ok(())
 }
 
+fn info_1(values: Option<Values>, info_1: Option<&str>) -> Result<(), Box<dyn Error>> {
+    let info_1 = info_1.expect("No value given");
+    for file in values.expect("Error: No input files") {
+        match Sauce::from_file(file) {
+            Ok(sauce) => {
+                if let Some(mut sauce) = sauce {
+                    match info_1.parse::<usize>() {
+                        Ok(info_1) => {
+                            sauce.info_1 = info_1;
+                            match sauce.add_to_file(file) {
+                                Ok(_) => println!("{}: Added value", file),
+                                Err(e) => eprintln!("{}: {}", file, e),
+                            }
+                        },
+                        Err(e) => eprintln!("{}: {}", file, e),
+                    }
+                }
+            },
+            Err(e) => eprintln!("{}: {}", file, e),
+        }
+    }
+    Ok(())
+}
+
+fn info_2(values: Option<Values>, info_2: Option<&str>) -> Result<(), Box<dyn Error>> {
+    let info_2 = info_2.expect("No value given");
+    for file in values.expect("Error: No input files") {
+        match Sauce::from_file(file) {
+            Ok(sauce) => {
+                if let Some(mut sauce) = sauce {
+                    match info_2.parse::<usize>() {
+                        Ok(info_2) => {
+                            sauce.info_2 = info_2;
+                            match sauce.add_to_file(file) {
+                                Ok(_) => println!("{}: Added value", file),
+                                Err(e) => eprintln!("{}: {}", file, e),
+                            }
+                        },
+                        Err(e) => eprintln!("{}: {}", file, e),
+                    }
+                }
+            },
+            Err(e) => eprintln!("{}: {}", file, e),
+        }
+    }
+    Ok(())
+}
+
+fn info_3(values: Option<Values>, info_3: Option<&str>) -> Result<(), Box<dyn Error>> {
+    let info_3 = info_3.expect("No value given");
+    for file in values.expect("Error: No input files") {
+        match Sauce::from_file(file) {
+            Ok(sauce) => {
+                if let Some(mut sauce) = sauce {
+                    match info_3.parse::<usize>() {
+                        Ok(info_3) => {
+                            sauce.info_3 = info_3;
+                            match sauce.add_to_file(file) {
+                                Ok(_) => println!("{}: Added value", file),
+                                Err(e) => eprintln!("{}: {}", file, e),
+                            }
+                        },
+                        Err(e) => eprintln!("{}: {}", file, e),
+                    }
+                }
+            },
+            Err(e) => eprintln!("{}: {}", file, e),
+        }
+    }
+    Ok(())
+}
+
+fn info_4(values: Option<Values>, info_4: Option<&str>) -> Result<(), Box<dyn Error>> {
+    let info_4 = info_4.expect("No value given");
+    for file in values.expect("Error: No input files") {
+        match Sauce::from_file(file) {
+            Ok(sauce) => {
+                if let Some(mut sauce) = sauce {
+                    match info_4.parse::<usize>() {
+                        Ok(info_4) => {
+                            sauce.info_4 = info_4;
+                            match sauce.add_to_file(file) {
+                                Ok(_) => println!("{}: Added value", file),
+                                Err(e) => eprintln!("{}: {}", file, e),
+                            }
+                        },
+                        Err(e) => eprintln!("{}: {}", file, e),
+                    }
+                }
+            },
+            Err(e) => eprintln!("{}: {}", file, e),
+        }
+    }
+    Ok(())
+}
+
+fn set_ice_colors(values: Option<Values>, ice_colors: bool) -> Result<(), Box<dyn Error>> {
+    for file in values.expect("Error: No input files") {
+        match Sauce::from_file(file) {
+            Ok(sauce) => {
+                if let Some(mut sauce) = sauce {
+                    if let Some(DataType::BinaryText) = sauce.datatype {
+                        sauce.ice_colors = ice_colors;
+                        match sauce.add_to_file(file) {
+                            Ok(_) => println!("{}: Changed ice-colors to {}", file, ice_colors),
+                            Err(e) => eprintln!("{}: {}", file, e),
+                        }
+                    } else {
+                        match sauce.filetype {
+                            Some(FileType::ASCII) | Some(FileType::ANSI) | Some(FileType::ANSImation) => {
+                                sauce.ice_colors = ice_colors;
+                                match sauce.add_to_file(file) {
+                                    Ok(_) => println!("{}: Changed ice-colors to {}", file, ice_colors),
+                                    Err(e) => eprintln!("{}: {}", file, e),
+                                }
+                            },
+                            _ => {},
+                        }
+                    }
+                }
+            },
+            Err(e) => eprintln!("{}: {}", file, e),
+        }
+    }
+    Ok(())
+}
+
+fn set_aspect_ratio(values: Option<Values>, aspect_ratio: Option<AspectRatio>) -> Result<(), Box<dyn Error>> {
+    for file in values.expect("Error: No input files") {
+        match Sauce::from_file(file) {
+            Ok(sauce) => {
+                if let Some(mut sauce) = sauce {
+                    if let Some(DataType::BinaryText) = sauce.datatype {
+                        sauce.aspect_ratio = aspect_ratio.clone();
+                        match sauce.add_to_file(file) {
+                            Ok(_) => {
+                                if let Some(aspect_ratio) = sauce.aspect_ratio {
+                                    println!("{}: Changed aspect ratio to {}", file, aspect_ratio);
+                                } else {
+                                    println!("{}: Removed aspect ratio setting", file);
+                                }
+                            },
+                            Err(e) => eprintln!("{}: {}", file, e),
+                        }
+                    } else {
+                        match sauce.filetype {
+                            Some(FileType::ASCII) | Some(FileType::ANSI) | Some(FileType::ANSImation) => {
+                                sauce.aspect_ratio = aspect_ratio.clone();
+                                match sauce.add_to_file(file) {
+                                    Ok(_) => {
+                                        if let Some(aspect_ratio) = sauce.aspect_ratio {
+                                            println!("{}: Changed aspect ratio to {}", file, aspect_ratio);
+                                        } else {
+                                            println!("{}: Removed aspect ratio setting", file);
+                                        }
+                                    },
+                                    Err(e) => eprintln!("{}: {}", file, e),
+                                }
+                            },
+                            _ => {},
+                        }
+                    }
+                }
+            },
+            Err(e) => eprintln!("{}: {}", file, e),
+        }
+    }
+    Ok(())
+}
+
+fn set_letter_spacing(values: Option<Values>, letter_spacing: Option<LetterSpacing>) -> Result<(), Box<dyn Error>> {
+    for file in values.expect("Error: No input files") {
+        match Sauce::from_file(file) {
+            Ok(sauce) => {
+                if let Some(mut sauce) = sauce {
+                    if let Some(DataType::BinaryText) = sauce.datatype {
+                        sauce.letter_spacing = letter_spacing.clone();
+                        match sauce.add_to_file(file) {
+                            Ok(_) => {
+                                if let Some(letter_spacing) = sauce.letter_spacing {
+                                    println!("{}: Changed letter spacing to {}", file, letter_spacing);
+                                } else {
+                                    println!("{}: Removed letter spacing setting", file);
+                                }
+                            },
+                            Err(e) => eprintln!("{}: {}", file, e),
+                        }
+                    } else {
+                        match sauce.filetype {
+                            Some(FileType::ASCII) | Some(FileType::ANSI) | Some(FileType::ANSImation) => {
+                                sauce.letter_spacing = letter_spacing.clone();
+                                match sauce.add_to_file(file) {
+                                    Ok(_) => {
+                                        if let Some(letter_spacing) = sauce.letter_spacing {
+                                            println!("{}: Changed letter spacing to {}", file, letter_spacing);
+                                        } else {
+                                            println!("{}: Removed letter spacing setting", file);
+                                        }
+                                    },
+                                    Err(e) => eprintln!("{}: {}", file, e),
+                                }
+                            },
+                            _ => {},
+                        }
+                    }
+                }
+            },
+            Err(e) => eprintln!("{}: {}", file, e),
+        }
+    }
+    Ok(())
+}
+
 fn font(values: Option<Values>, font: Option<&str>) -> Result<(), Box<dyn Error>> {
     let font = font.expect("No font given");
     for file in values.expect("Error: No input files") {
@@ -502,6 +715,42 @@ pub fn sauce_options(matches: &ArgMatches) -> Result<(), Box<dyn Error>> {
     }
     if matches.is_present("day") {
         day(matches.values_of("FILE"), matches.value_of("day"))?;
+    }
+    if matches.is_present("info_1") {
+        info_1(matches.values_of("FILE"), matches.value_of("info_1"))?;
+    }
+    if matches.is_present("info_2") {
+        info_2(matches.values_of("FILE"), matches.value_of("info_2"))?;
+    }
+    if matches.is_present("info_3") {
+        info_3(matches.values_of("FILE"), matches.value_of("info_3"))?;
+    }
+    if matches.is_present("info_4") {
+        info_4(matches.values_of("FILE"), matches.value_of("info_4"))?;
+    }
+    if matches.is_present("ice_colors") {
+        set_ice_colors(matches.values_of("FILE"), true)?;
+    }
+    if matches.is_present("no_ice_colors") {
+        set_ice_colors(matches.values_of("FILE"), false)?;
+    }
+    if matches.is_present("modern_aspect") {
+        set_aspect_ratio(matches.values_of("FILE"), Some(AspectRatio::Modern))?;
+    }
+    if matches.is_present("legacy_aspect") {
+        set_aspect_ratio(matches.values_of("FILE"), Some(AspectRatio::Legacy))?;
+    }
+    if matches.is_present("unset_aspect") {
+        set_aspect_ratio(matches.values_of("FILE"), None)?;
+    }
+    if matches.is_present("letter_spacing") {
+        set_letter_spacing(matches.values_of("FILE"), Some(LetterSpacing::NinePixels))?;
+    }
+    if matches.is_present("no_letter_spacing") {
+        set_letter_spacing(matches.values_of("FILE"), Some(LetterSpacing::EightPixels))?;
+    }
+    if matches.is_present("unset_letter_spacing") {
+        set_letter_spacing(matches.values_of("FILE"), None)?;
     }
     if matches.is_present("font") {
         font(matches.values_of("FILE"), matches.value_of("font"))?;

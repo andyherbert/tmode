@@ -1,8 +1,12 @@
 mod datatype;
 mod filetype;
 mod error;
+mod aspect_ratio;
+mod letter_spacing;
 pub use datatype::*;
 pub use filetype::*;
+pub use aspect_ratio::*;
+pub use letter_spacing::*;
 use error::*;
 use crate::string::*;
 use crate::bytes::*;
@@ -22,13 +26,13 @@ pub struct Sauce {
     actual_filesize: usize,
     pub datatype: Option<DataType>,
     pub filetype: Option<FileType>,
-    pub type_info_1: usize,
-    pub type_info_2: usize,
-    pub type_info_3: usize,
-    pub type_info_4: usize,
+    pub info_1: usize,
+    pub info_2: usize,
+    pub info_3: usize,
+    pub info_4: usize,
     pub ice_colors: bool,
-    pub letter_spacing: Option<bool>,
-    pub modern_aspect_ratio: Option<bool>,
+    pub letter_spacing: Option<LetterSpacing>,
+    pub aspect_ratio: Option<AspectRatio>,
     pub font_name: String,
     pub comments: Option<String>,
 }
@@ -121,28 +125,26 @@ impl Sauce {
         if let Some(filetype) = &self.filetype {
             sauce_bytes[95] = filetype.as_u8();
         }
-        self.type_info_1.pack_to_bytes(&mut sauce_bytes[96..=97]);
-        self.type_info_2.pack_to_bytes(&mut sauce_bytes[98..=99]);
-        self.type_info_3.pack_to_bytes(&mut sauce_bytes[100..=101]);
-        self.type_info_4.pack_to_bytes(&mut sauce_bytes[102..=103]);
+        self.info_1.pack_to_bytes(&mut sauce_bytes[96..=97]);
+        self.info_2.pack_to_bytes(&mut sauce_bytes[98..=99]);
+        self.info_3.pack_to_bytes(&mut sauce_bytes[100..=101]);
+        self.info_4.pack_to_bytes(&mut sauce_bytes[102..=103]);
         sauce_bytes[104] = comments_length as u8;
         if self.ice_colors {
             sauce_bytes[105] = 1;
         }
-        if let Some(letter_spacing) = self.letter_spacing {
-            if letter_spacing {
-                sauce_bytes[105] += 2 << 1;
-            } else {
-                sauce_bytes[105] += 1 << 1;
-            }
+        if let Some(letter_spacing) = &self.letter_spacing {
+            sauce_bytes[105] += match letter_spacing {
+                LetterSpacing::EightPixels => 1 << 1,
+                LetterSpacing::NinePixels => 2 << 1,
+            };
         }
-        if let Some(modern_aspect_ratio) = self.modern_aspect_ratio {
-            if modern_aspect_ratio {
-                sauce_bytes[105] += 2 << 3;
-            } else {
-                sauce_bytes[105] += 1 << 3;
+        if let Some(aspect_ratio) = &self.aspect_ratio {
+            sauce_bytes[105] += match aspect_ratio {
+                AspectRatio::Modern => 2 << 3,
+                AspectRatio::Legacy => 1 << 3,
             }
-        }
+        };
         self.font_name.as_cp437_bytes().pad_with_null(22).write_to_slice(&mut sauce_bytes[106..=127])?;
         Ok(bytes.to_vec())
     }
@@ -167,23 +169,23 @@ impl Sauce {
         sauce.filesize = sauce_bytes[90..=93].as_usize();
         sauce.datatype = sauce_bytes[94].as_datatype()?;
         sauce.filetype = sauce_bytes[95].as_filetype(&sauce.datatype)?;
-        sauce.type_info_1 = sauce_bytes[96..=97].as_usize();
-        sauce.type_info_2 = sauce_bytes[98..=99].as_usize();
-        sauce.type_info_3 = sauce_bytes[100..=101].as_usize();
-        sauce.type_info_4 = sauce_bytes[102..=103].as_usize();
+        sauce.info_1 = sauce_bytes[96..=97].as_usize();
+        sauce.info_2 = sauce_bytes[98..=99].as_usize();
+        sauce.info_3 = sauce_bytes[100..=101].as_usize();
+        sauce.info_4 = sauce_bytes[102..=103].as_usize();
         let lines_of_comments = sauce_bytes[104] as usize;
         let flags = sauce_bytes[105];
         sauce.ice_colors = (flags & 1) == 1;
         sauce.letter_spacing = match (flags >> 1) & 3 {
             0 => None,
-            1 => Some(false),
-            2 => Some(true),
+            1 => Some(LetterSpacing::EightPixels),
+            2 => Some(LetterSpacing::NinePixels),
             _ => return Err(Box::new(SauceError::InvalidLetterSpacingValue)),
         };
-        sauce.modern_aspect_ratio = match (flags >> 3) & 3 {
+        sauce.aspect_ratio = match (flags >> 3) & 3 {
             0 => None,
-            1 => Some(false),
-            2 => Some(true),
+            1 => Some(AspectRatio::Legacy),
+            2 => Some(AspectRatio::Modern),
             _ => return Err(Box::new(SauceError::InvalidAspectRatioValue)),
         };
         sauce.font_name = String::from_cp437_bytes(&sauce_bytes[106..=127].to_vec().strip_trailing_null());
@@ -243,18 +245,18 @@ impl std::fmt::Display for Sauce {
             Some(filetype) => writeln!(f, "filetype: {}", filetype)?,
             None => writeln!(f, "filetype: None")?,
         }
-        writeln!(f, "type info 1: {}", self.type_info_1)?;
-        writeln!(f, "type info 2: {}", self.type_info_2)?;
-        writeln!(f, "type info 3: {}", self.type_info_3)?;
-        writeln!(f, "type info 4: {}", self.type_info_4)?;
+        writeln!(f, "type info 1: {}", self.info_1)?;
+        writeln!(f, "type info 2: {}", self.info_2)?;
+        writeln!(f, "type info 3: {}", self.info_3)?;
+        writeln!(f, "type info 4: {}", self.info_4)?;
         writeln!(f, "ice colors: {}", self.ice_colors)?;
         match &self.letter_spacing {
             Some(letter_spacing) => writeln!(f, "letter spacing: {}", letter_spacing)?,
-            None => writeln!(f, "letter spacing: not set")?,
+            None => writeln!(f, "letter spacing not set")?,
         }
-        match &self.modern_aspect_ratio {
-            Some(modern_aspect_ratio) => writeln!(f, "modern aspect ratio: {}", modern_aspect_ratio)?,
-            None => writeln!(f, "modern aspect ratio: not set")?,
+        match &self.aspect_ratio {
+            Some(modern_aspect_ratio) => writeln!(f, "aspect ratio: {}", modern_aspect_ratio)?,
+            None => writeln!(f, "aspect ratio not set")?,
         }
         writeln!(f, "font name: {}", &self.font_name)?;
         match &self.comments {

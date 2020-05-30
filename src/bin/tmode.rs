@@ -1,6 +1,6 @@
 use clap::{clap_app, ArgMatches, crate_version, crate_description, crate_authors};
 use std::u64;
-use textmode::*;
+use textmode::{Sauce, sauce::DataType, sauce::FileType};
 use std::error::Error;
 use std::path::Path;
 use chrono::{Datelike, Local};
@@ -30,8 +30,8 @@ pub fn sauce_options(matches: &ArgMatches) -> Result<(), Box<dyn Error>> {
                                                 Some(sauce) => sauce,
                                                 None => Sauce::new(),
                                             };
-                                            sauce.datatype = Some(textmode::DataType::Bitmap);
-                                            sauce.filetype = Some(textmode::FileType::GIF);
+                                            sauce.datatype = Some(DataType::Bitmap);
+                                            sauce.filetype = Some(FileType::GIF);
                                             sauce.type_info_1 = width as usize;
                                             sauce.type_info_2 = height as usize;
                                             match sauce.add_to_file(file) {
@@ -52,8 +52,8 @@ pub fn sauce_options(matches: &ArgMatches) -> Result<(), Box<dyn Error>> {
                                         Some(sauce) => sauce,
                                         None => Sauce::new(),
                                     };
-                                    sauce.datatype = Some(textmode::DataType::Audio);
-                                    sauce.filetype = Some(textmode::FileType::IT);
+                                    sauce.datatype = Some(DataType::Audio);
+                                    sauce.filetype = Some(FileType::IT);
                                     match sauce.add_to_file(file) {
                                         Ok(_) => println!("{}: Added filetype Audio/IT", file),
                                         Err(e) => eprintln!("{}: {}", file, e),
@@ -71,8 +71,8 @@ pub fn sauce_options(matches: &ArgMatches) -> Result<(), Box<dyn Error>> {
                                                 Some(sauce) => sauce,
                                                 None => Sauce::new(),
                                             };
-                                            sauce.datatype = Some(textmode::DataType::Bitmap);
-                                            sauce.filetype = Some(textmode::FileType::JPG);
+                                            sauce.datatype = Some(DataType::Bitmap);
+                                            sauce.filetype = Some(FileType::JPG);
                                             sauce.type_info_1 = width as usize;
                                             sauce.type_info_2 = height as usize;
                                             match sauce.add_to_file(file) {
@@ -90,8 +90,8 @@ pub fn sauce_options(matches: &ArgMatches) -> Result<(), Box<dyn Error>> {
                                                 Some(sauce) => sauce,
                                                 None => Sauce::new(),
                                             };
-                                            sauce.datatype = Some(textmode::DataType::Bitmap);
-                                            sauce.filetype = Some(textmode::FileType::JPG);
+                                            sauce.datatype = Some(DataType::Bitmap);
+                                            sauce.filetype = Some(FileType::JPG);
                                             match sauce.add_to_file(file) {
                                                 Ok(_) => println!("{}: Added filetype Bitmap/JPG", file),
                                                 Err(e) => eprintln!("{}: {}", file, e),
@@ -109,8 +109,8 @@ pub fn sauce_options(matches: &ArgMatches) -> Result<(), Box<dyn Error>> {
                                         Some(sauce) => sauce,
                                         None => Sauce::new(),
                                     };
-                                    sauce.datatype = Some(textmode::DataType::Bitmap);
-                                    sauce.filetype = Some(textmode::FileType::MPG);
+                                    sauce.datatype = Some(DataType::Bitmap);
+                                    sauce.filetype = Some(FileType::MPG);
                                     match sauce.add_to_file(file) {
                                         Ok(_) => println!("{}: Added filetype Bitmap/MPG", file),
                                         Err(e) => eprintln!("{}: {}", file, e),
@@ -128,8 +128,8 @@ pub fn sauce_options(matches: &ArgMatches) -> Result<(), Box<dyn Error>> {
                                                 Some(sauce) => sauce,
                                                 None => Sauce::new(),
                                             };
-                                            sauce.datatype = Some(textmode::DataType::Bitmap);
-                                            sauce.filetype = Some(textmode::FileType::PNG);
+                                            sauce.datatype = Some(DataType::Bitmap);
+                                            sauce.filetype = Some(FileType::PNG);
                                             sauce.type_info_1 = width as usize;
                                             sauce.type_info_2 = height as usize;
                                             match sauce.add_to_file(file) {
@@ -150,8 +150,8 @@ pub fn sauce_options(matches: &ArgMatches) -> Result<(), Box<dyn Error>> {
                                         Some(sauce) => sauce,
                                         None => Sauce::new(),
                                     };
-                                    sauce.datatype = Some(textmode::DataType::Character);
-                                    sauce.filetype = Some(textmode::FileType::RIPScript);
+                                    sauce.datatype = Some(DataType::Character);
+                                    sauce.filetype = Some(FileType::RIPScript);
                                     match sauce.add_to_file(file) {
                                         Ok(_) => println!("{}: Added filetype Character/RIPScript", file),
                                         Err(e) => eprintln!("{}: {}", file, e),
@@ -167,8 +167,8 @@ pub fn sauce_options(matches: &ArgMatches) -> Result<(), Box<dyn Error>> {
                                         Some(sauce) => sauce,
                                         None => Sauce::new(),
                                     };
-                                    sauce.datatype = Some(textmode::DataType::Audio);
-                                    sauce.filetype = Some(textmode::FileType::S3M);
+                                    sauce.datatype = Some(DataType::Audio);
+                                    sauce.filetype = Some(FileType::S3M);
                                     match sauce.add_to_file(file) {
                                         Ok(_) => println!("{}: Added filetype Audio/S3M", file),
                                         Err(e) => eprintln!("{}: {}", file, e),
@@ -480,7 +480,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         (@arg year: --year +takes_value +require_equals requires("FILE") "Adds a year to SAUCE records.")
         (@arg FILE: ... #{1, u64::MAX} "Sets the input file(s) to use.")
     );
-    let matches = app.get_matches();
+    let matches = app.get_matches_from(wild::args());
     if let Err(e) = sauce_options(&matches) {
         eprintln!("Error: {}", e);
         std::process::exit(1);

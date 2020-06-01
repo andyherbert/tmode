@@ -1,8 +1,7 @@
 use regex::Regex;
 use serde::{Deserialize, Serialize};
-use crate::sauce::DataType;
+use crate::sauce::{SauceError, DataType};
 pub use std::str::FromStr;
-use super::error::*;
 
 #[derive(Deserialize, Serialize)]
 pub enum FileType {

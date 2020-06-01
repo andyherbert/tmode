@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 pub use std::str::FromStr;
-use super::error::*;
+use crate::sauce::error::SauceError;
 
 #[derive(Deserialize, Serialize, Clone)]
 pub enum LetterSpacing {

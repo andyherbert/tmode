@@ -6,7 +6,8 @@ mod includes;
 use includes::*;
 use error::FontError;
 use crate::bytes::{read_file_to_bytes, write_bytes_to_file};
-
+use crate::string::CP437String;
+use crate::sauce::Sauce;
 
 pub struct Font {
     pub width: usize,
@@ -119,6 +120,63 @@ impl Font {
         }
         image.as_png(file)?;
         Ok(())
+    }
+
+    pub fn from_sauce(file: &str) -> Result<Font, Box<dyn Error>> {
+        let font = match Sauce::from_file(file)? {
+            Some(sauce) => match sauce.font_name.parse::<Font>() {
+                Ok(font) => font,
+                Err(_) => Font::default(),
+            }
+            None => Font::default(),
+        };
+        Ok(font)
+    }
+
+    pub fn from_adf_file(file: &str) -> Result<Font, Box<dyn Error>> {
+        let bytes = read_file_to_bytes(file)?;
+        if bytes.len() < 193 + 4096 {
+            return Err(Box::new(FontError::InvalidADFFile));
+        }
+        let font = Font::new(&bytes[193..193 + 4096], 8, 16, 256);
+        Ok(font)
+    }
+
+    pub fn from_idf_file(file: &str) -> Result<Font, Box<dyn Error>> {
+        let bytes = read_file_to_bytes(file)?;
+        if bytes.len() < 193 + 4096 {
+            return Err(Box::new(FontError::InvalidIDFFile));
+        }
+        let font_start = bytes.len() - (48 + 4096);
+        let font = Font::new(&bytes[font_start..font_start + 4096], 8, 16, 256);
+        Ok(font)
+    }
+
+    pub fn from_xbin_file(file: &str) -> Result<Font, Box<dyn Error>> {
+        let bytes = read_file_to_bytes(file)?;
+        let len = bytes.len();
+        if len < 11 || String::from_cp437_bytes(&bytes[0..4]) != "XBIN" {
+            return Err(Box::new(FontError::InvalidXBinFile));
+        }
+        if (bytes[10] >> 1) & 1 == 0 {
+            return Err(Box::new(FontError::NoFontDataFound));
+        }
+        let height = bytes[9] as usize;
+        if height < 1 || height > 32 {
+            return Err(Box::new(FontError::InvalidXBinFile));
+        }
+        let has_palette = bytes[10] & 1 == 1;
+        let font_start = if has_palette {
+            11 + 48
+        } else {
+            11
+        };
+        let font_end = font_start + (height * 256);
+        if len < font_end {
+            return Err(Box::new(FontError::InvalidXBinFile));
+        }
+        let font = Font::new(&bytes[font_start..font_end], 8, height, 256);
+        Ok(font)
     }
 
     pub fn as_bitmask_file(&self, file: &str) -> Result<(), Box<dyn Error>> {
@@ -302,5 +360,11 @@ impl FromStr for Font {
             "C64 PETSCII shifted" => Ok(Font::new(PETSCII_SHIFTED, 8, 8, 256)),
             _ => Err(Box::new(FontError::FontNotFound)),
         }
+    }
+}
+
+impl Default for Font {
+    fn default() -> Font {
+        Font::new(CP437_F16, 8, 16, 256)
     }
 }

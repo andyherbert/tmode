@@ -70,7 +70,6 @@ impl VecOps<u8> for Vec<u8> {
 
     fn strip_trailing_null(&mut self) -> &Vec<u8> {
         self.strip_trailing_value(ascii::NULL)
-
     }
 
     fn pad_with_value(&mut self, length: usize, value: u8) -> &Self {

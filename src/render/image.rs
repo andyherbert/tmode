@@ -23,9 +23,10 @@ impl Image {
     pub fn from_file(file: &str) -> Result<Image, Box<dyn Error>> {
         let file = File::open(file)?;
         let decoder = png::Decoder::new(file);
-        let (info, mut reader) = decoder.read_info()?;
-        let mut data = vec![0; info.buffer_size()];
+        let mut reader = decoder.read_info()?;
+        let mut data = vec![0; reader.output_buffer_size()];
         reader.next_frame(&mut data)?;
+        let info = reader.info();
         let image = Image {
             width: info.width as usize,
             height: info.height as usize,
@@ -69,7 +70,7 @@ impl Image {
         let file = File::create(file)?;
         let buffer = BufWriter::new(file);
         let mut encoder = png::Encoder::new(buffer, self.width as u32, self.height as u32);
-        encoder.set_color(png::ColorType::RGB);
+        encoder.set_color(png::ColorType::Rgb);
         encoder.set_depth(png::BitDepth::Eight);
         encoder.set_compression(png::Compression::Best);
         let mut writer = encoder.write_header()?;

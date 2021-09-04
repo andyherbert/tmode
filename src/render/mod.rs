@@ -1,4 +1,4 @@
-mod image;
 mod color;
-pub use self::image::Image;
+mod image;
 pub use self::color::Color;
+pub use self::image::Image;

@@ -1,6 +1,6 @@
+use crate::sauce::{DataType, SauceError};
 use regex::Regex;
 use serde::{Deserialize, Serialize};
-use crate::sauce::{SauceError, DataType};
 pub use std::str::FromStr;
 
 #[derive(Deserialize, Serialize)]
@@ -291,89 +291,85 @@ impl FromStr for FileType {
                     }
                 }
                 Err(Box::new(SauceError::InvalidFileType))
-            },
+            }
         }
     }
 }
 
 pub trait AsFileType {
-    fn as_filetype(&self, datatype: &Option<DataType>) -> Result<Option<FileType>, Box<SauceError>>;
+    fn as_filetype(&self, datatype: &Option<DataType>)
+        -> Result<Option<FileType>, Box<SauceError>>;
 }
 
 impl AsFileType for u8 {
-    fn as_filetype(&self, datatype: &Option<DataType>) -> Result<Option<FileType>, Box<SauceError>> {
+    fn as_filetype(
+        &self,
+        datatype: &Option<DataType>,
+    ) -> Result<Option<FileType>, Box<SauceError>> {
         match datatype {
-            Some(DataType::Character) => {
-                match self {
-                    0 => Ok(Some(FileType::ASCII)),
-                    1 => Ok(Some(FileType::ANSI)),
-                    2 => Ok(Some(FileType::ANSImation)),
-                    3 => Ok(Some(FileType::RIPScript)),
-                    4 => Ok(Some(FileType::PCBoard)),
-                    5 => Ok(Some(FileType::Avatar)),
-                    6 => Ok(Some(FileType::HTML)),
-                    7 => Ok(Some(FileType::Source)),
-                    8 => Ok(Some(FileType::TundraDraw)),
-                    _ => Err(Box::new(SauceError::InvalidFileType)),
-                }
+            Some(DataType::Character) => match self {
+                0 => Ok(Some(FileType::ASCII)),
+                1 => Ok(Some(FileType::ANSI)),
+                2 => Ok(Some(FileType::ANSImation)),
+                3 => Ok(Some(FileType::RIPScript)),
+                4 => Ok(Some(FileType::PCBoard)),
+                5 => Ok(Some(FileType::Avatar)),
+                6 => Ok(Some(FileType::HTML)),
+                7 => Ok(Some(FileType::Source)),
+                8 => Ok(Some(FileType::TundraDraw)),
+                _ => Err(Box::new(SauceError::InvalidFileType)),
             },
-            Some(DataType::Bitmap) => {
-                match self {
-                    0 => Ok(Some(FileType::GIF)),
-                    1 => Ok(Some(FileType::PCX)),
-                    2 => Ok(Some(FileType::LBMOrIFF)),
-                    3 => Ok(Some(FileType::TGA)),
-                    4 => Ok(Some(FileType::FLI)),
-                    5 => Ok(Some(FileType::FLC)),
-                    6 => Ok(Some(FileType::BMP)),
-                    7 => Ok(Some(FileType::GL)),
-                    8 => Ok(Some(FileType::DL)),
-                    9 => Ok(Some(FileType::WPGBitmap)),
-                    10 => Ok(Some(FileType::PNG)),
-                    11 => Ok(Some(FileType::JPG)),
-                    12 => Ok(Some(FileType::MPG)),
-                    13 => Ok(Some(FileType::AVI)),
-                    _ => Err(Box::new(SauceError::InvalidFileType)),
-                }
+            Some(DataType::Bitmap) => match self {
+                0 => Ok(Some(FileType::GIF)),
+                1 => Ok(Some(FileType::PCX)),
+                2 => Ok(Some(FileType::LBMOrIFF)),
+                3 => Ok(Some(FileType::TGA)),
+                4 => Ok(Some(FileType::FLI)),
+                5 => Ok(Some(FileType::FLC)),
+                6 => Ok(Some(FileType::BMP)),
+                7 => Ok(Some(FileType::GL)),
+                8 => Ok(Some(FileType::DL)),
+                9 => Ok(Some(FileType::WPGBitmap)),
+                10 => Ok(Some(FileType::PNG)),
+                11 => Ok(Some(FileType::JPG)),
+                12 => Ok(Some(FileType::MPG)),
+                13 => Ok(Some(FileType::AVI)),
+                _ => Err(Box::new(SauceError::InvalidFileType)),
             },
-            Some(DataType::Vector) => {
-                match self {
-                    0 => Ok(Some(FileType::DXF)),
-                    1 => Ok(Some(FileType::DWG)),
-                    2 => Ok(Some(FileType::WPGVector)),
-                    3 => Ok(Some(FileType::Studio3DS)),
-                    _ => Err(Box::new(SauceError::InvalidFileType)),
-                }
+            Some(DataType::Vector) => match self {
+                0 => Ok(Some(FileType::DXF)),
+                1 => Ok(Some(FileType::DWG)),
+                2 => Ok(Some(FileType::WPGVector)),
+                3 => Ok(Some(FileType::Studio3DS)),
+                _ => Err(Box::new(SauceError::InvalidFileType)),
             },
-            Some(DataType::Audio) => {
-                match self {
-                    0 => Ok(Some(FileType::MOD)),
-                    1 => Ok(Some(FileType::Renaissance669)),
-                    2 => Ok(Some(FileType::STM)),
-                    3 => Ok(Some(FileType::S3M)),
-                    4 => Ok(Some(FileType::MTM)),
-                    5 => Ok(Some(FileType::FAR)),
-                    6 => Ok(Some(FileType::ULT)),
-                    7 => Ok(Some(FileType::AMF)),
-                    8 => Ok(Some(FileType::DMF)),
-                    9 => Ok(Some(FileType::OKT)),
-                    10 => Ok(Some(FileType::ROL)),
-                    11 => Ok(Some(FileType::CMF)),
-                    12 => Ok(Some(FileType::MID)),
-                    13 => Ok(Some(FileType::SADT)),
-                    14 => Ok(Some(FileType::VOC)),
-                    15 => Ok(Some(FileType::WAV)),
-                    16 => Ok(Some(FileType::SMP8)),
-                    17 => Ok(Some(FileType::SMP8S)),
-                    18 => Ok(Some(FileType::SMP16)),
-                    19 => Ok(Some(FileType::SMP16S)),
-                    20 => Ok(Some(FileType::PATCH8)),
-                    21 => Ok(Some(FileType::PATCH16)),
-                    22 => Ok(Some(FileType::XM)),
-                    23 => Ok(Some(FileType::HSC)),
-                    24 => Ok(Some(FileType::IT)),
-                    _ => Err(Box::new(SauceError::InvalidFileType)),
-                }
+            Some(DataType::Audio) => match self {
+                0 => Ok(Some(FileType::MOD)),
+                1 => Ok(Some(FileType::Renaissance669)),
+                2 => Ok(Some(FileType::STM)),
+                3 => Ok(Some(FileType::S3M)),
+                4 => Ok(Some(FileType::MTM)),
+                5 => Ok(Some(FileType::FAR)),
+                6 => Ok(Some(FileType::ULT)),
+                7 => Ok(Some(FileType::AMF)),
+                8 => Ok(Some(FileType::DMF)),
+                9 => Ok(Some(FileType::OKT)),
+                10 => Ok(Some(FileType::ROL)),
+                11 => Ok(Some(FileType::CMF)),
+                12 => Ok(Some(FileType::MID)),
+                13 => Ok(Some(FileType::SADT)),
+                14 => Ok(Some(FileType::VOC)),
+                15 => Ok(Some(FileType::WAV)),
+                16 => Ok(Some(FileType::SMP8)),
+                17 => Ok(Some(FileType::SMP8S)),
+                18 => Ok(Some(FileType::SMP16)),
+                19 => Ok(Some(FileType::SMP16S)),
+                20 => Ok(Some(FileType::PATCH8)),
+                21 => Ok(Some(FileType::PATCH16)),
+                22 => Ok(Some(FileType::XM)),
+                23 => Ok(Some(FileType::HSC)),
+                24 => Ok(Some(FileType::IT)),
+                _ => Err(Box::new(SauceError::InvalidFileType)),
             },
             Some(DataType::BinaryText) => Ok(Some(FileType::Variable(*self))),
             Some(DataType::XBin) => {
@@ -382,21 +378,19 @@ impl AsFileType for u8 {
                 } else {
                     Ok(Some(FileType::XBin))
                 }
-            },
-            Some(DataType::Archive) => {
-                match self {
-                    0 =>Ok(Some(FileType::ZIP)),
-                    1 =>Ok(Some(FileType::ARJ)),
-                    2 =>Ok(Some(FileType::LZH)),
-                    3 =>Ok(Some(FileType::ARC)),
-                    4 =>Ok(Some(FileType::TAR)),
-                    5 =>Ok(Some(FileType::ZOO)),
-                    6 =>Ok(Some(FileType::RAR)),
-                    7 =>Ok(Some(FileType::UC2)),
-                    8 =>Ok(Some(FileType::PAK)),
-                    9 =>Ok(Some(FileType::SQZ)),
-                    _ => Err(Box::new(SauceError::InvalidFileType)),
-                }
+            }
+            Some(DataType::Archive) => match self {
+                0 => Ok(Some(FileType::ZIP)),
+                1 => Ok(Some(FileType::ARJ)),
+                2 => Ok(Some(FileType::LZH)),
+                3 => Ok(Some(FileType::ARC)),
+                4 => Ok(Some(FileType::TAR)),
+                5 => Ok(Some(FileType::ZOO)),
+                6 => Ok(Some(FileType::RAR)),
+                7 => Ok(Some(FileType::UC2)),
+                8 => Ok(Some(FileType::PAK)),
+                9 => Ok(Some(FileType::SQZ)),
+                _ => Err(Box::new(SauceError::InvalidFileType)),
             },
             Some(DataType::Executable) | None => {
                 if *self != 0 {
@@ -404,7 +398,7 @@ impl AsFileType for u8 {
                 } else {
                     Ok(None)
                 }
-            },
+            }
         }
     }
 }

@@ -1,13 +1,13 @@
-use crate::render::{Image, Color};
+use crate::render::{Color, Image};
 use std::error::Error;
 pub use std::str::FromStr;
 mod error;
 mod includes;
-use includes::*;
-use error::FontError;
 use crate::bytes::{read_file_to_bytes, write_bytes_to_file};
-use crate::string::CP437String;
 use crate::sauce::Sauce;
+use crate::string::CP437String;
+use error::FontError;
+use includes::*;
 
 pub struct Font {
     pub width: usize,
@@ -28,9 +28,13 @@ pub fn get_boolmasks(bitmask: &[u8], width: usize, height: usize) -> Vec<Vec<boo
     let mut boolmasks = Vec::new();
     for glyph_start in (0..boolmask.len()).step_by(glyph_len) {
         let mut glyph_mask = Vec::new();
-        for i in glyph_start..glyph_start + glyph_len {
-            glyph_mask.push(boolmask[i]);
-        }
+        boolmask
+            .iter()
+            .skip(glyph_start)
+            .take(glyph_len)
+            .for_each(|value| {
+                glyph_mask.push(*value);
+            });
         boolmasks.push(glyph_mask);
     }
     boolmasks
@@ -46,7 +50,12 @@ impl Font {
         }
     }
 
-    pub fn from_bitmask_file(file: &str, width: usize, height: Option<usize>, length: usize) -> Result<Font, Box<dyn Error>> {
+    pub fn from_bitmask_file(
+        file: &str,
+        width: usize,
+        height: Option<usize>,
+        length: usize,
+    ) -> Result<Font, Box<dyn Error>> {
         let bytes = read_file_to_bytes(file)?;
         let height = match height {
             Some(height) => height,
@@ -59,13 +68,21 @@ impl Font {
         Ok(font)
     }
 
-    pub fn from_png_file(file: &str, width: usize, height: Option<usize>, length: usize) -> Result<Font, Box<dyn Error>> {
+    pub fn from_png_file(
+        file: &str,
+        width: usize,
+        height: Option<usize>,
+        length: usize,
+    ) -> Result<Font, Box<dyn Error>> {
         let image = Image::from_file(file)?;
         let height = match height {
             Some(height) => height,
             None => image.height / (image.width / width),
         };
-        if image.width % width != 0 || image.height % height != 0 || (image.width / width) * (image.height / height) < length {
+        if image.width % width != 0
+            || image.height % height != 0
+            || (image.width / width) * (image.height / height) < length
+        {
             return Err(Box::new(FontError::ImageNotCorrectDimensions));
         }
         let mut glyph_x = 0;
@@ -75,7 +92,10 @@ impl Font {
             for y in glyph_y..glyph_y + height {
                 for x in glyph_x..glyph_x + width {
                     let i = (y * image.width + x) * 3;
-                    let avg = (image.data[i] as usize + image.data[i + 1]  as usize + image.data[i + 2]  as usize) / 3;
+                    let avg = (image.data[i] as usize
+                        + image.data[i + 1] as usize
+                        + image.data[i + 2] as usize)
+                        / 3;
                     boolmask.push(avg > 127);
                 }
             }
@@ -89,14 +109,10 @@ impl Font {
         let mut bitmask = Vec::with_capacity(boolmask.len() / 8);
         for i in (0..boolmask.len()).step_by(8) {
             let mut byte: u8 = 0;
-            for j in i..i + 8 {
+            boolmask.iter().skip(i).take(8).for_each(|value| {
                 byte <<= 1;
-                byte += if boolmask[j] {
-                    1
-                } else {
-                    0
-                }
-            }
+                byte += if *value { 1 } else { 0 }
+            });
             bitmask.push(byte);
         }
         let font = Font::new(&bitmask, width, height, length);
@@ -104,13 +120,23 @@ impl Font {
     }
 
     pub fn as_png_file(&self, file: &str, width: usize) -> Result<(), Box<dyn Error>> {
-        let mut image = Image::new(width * self.width, (self.length as f32 / width as f32).ceil() as usize * self.height);
+        let mut image = Image::new(
+            width * self.width,
+            (self.length as f32 / width as f32).ceil() as usize * self.height,
+        );
         let black = Color::new(0, 0, 0);
         let white = Color::new(255, 255, 255);
         let mut x = 0;
         let mut y = 0;
         for code in 0..self.length {
-            image.draw_font(x * self.width, y * self.height, &self, code, &white.rgb, &black.rgb);
+            image.draw_font(
+                x * self.width,
+                y * self.height,
+                self,
+                code,
+                &white.rgb,
+                &black.rgb,
+            );
             if x + 1 == width {
                 y += 1;
                 x = 0;
@@ -127,7 +153,7 @@ impl Font {
             Some(sauce) => match sauce.font_name.parse::<Font>() {
                 Ok(font) => font,
                 Err(_) => Font::default(),
-            }
+            },
             None => Font::default(),
         };
         Ok(font)
@@ -162,15 +188,11 @@ impl Font {
             return Err(Box::new(FontError::NoFontDataFound));
         }
         let height = bytes[9] as usize;
-        if height < 1 || height > 32 {
+        if !(1..=32).contains(&height) {
             return Err(Box::new(FontError::InvalidXBinFile));
         }
         let has_palette = bytes[10] & 1 == 1;
-        let font_start = if has_palette {
-            11 + 48
-        } else {
-            11
-        };
+        let font_start = if has_palette { 11 + 48 } else { 11 };
         let font_end = font_start + (height * 256);
         if len < font_end {
             return Err(Box::new(FontError::InvalidXBinFile));
@@ -180,7 +202,8 @@ impl Font {
     }
 
     pub fn as_bitmask_file(&self, file: &str) -> Result<(), Box<dyn Error>> {
-        let bytes_len = (self.width as f32 * self.height as f32 * self.length as f32 / 8.0).ceil() as usize;
+        let bytes_len =
+            (self.width as f32 * self.height as f32 * self.length as f32 / 8.0).ceil() as usize;
         let bits_len = bytes_len * 8;
         let mut bitmasks = self.bitmasks.concat();
         let mut bytes = Vec::with_capacity(bytes_len);
@@ -189,14 +212,10 @@ impl Font {
         }
         for byte_start in (0..bitmasks.len()).step_by(8) {
             let mut byte: u8 = 0;
-            for i in byte_start..byte_start + 8 {
+            bitmasks.iter().skip(byte_start).take(8).for_each(|value| {
                 byte <<= 1;
-                byte += if bitmasks[i] {
-                    1
-                } else {
-                    0
-                }
-            }
+                byte += if *value { 1 } else { 0 }
+            });
             bytes.push(byte);
         }
         write_bytes_to_file(&bytes, file)?;

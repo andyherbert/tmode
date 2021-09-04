@@ -1,6 +1,6 @@
+use crate::sauce::error::SauceError;
 use serde::{Deserialize, Serialize};
 pub use std::str::FromStr;
-use crate::sauce::error::SauceError;
 
 #[derive(Deserialize, Serialize)]
 pub enum DataType {

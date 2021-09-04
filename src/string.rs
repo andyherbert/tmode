@@ -2,7 +2,7 @@ use std::char;
 
 pub trait CP437Char {
     fn from_cp437_byte(byte: u8) -> char;
-    fn as_cp437_byte(self) -> Option<u8>;
+    fn as_cp437_byte(&self) -> Option<u8>;
 }
 
 pub trait CP437String {
@@ -177,9 +177,9 @@ impl CP437Char for char {
         }
     }
 
-    fn as_cp437_byte(self) -> Option<u8> {
-        let unicode = self as u32;
-        match unicode {
+    fn as_cp437_byte(&self) -> Option<u8> {
+        let unicode = *self as u32;
+        match *self as u32 {
             0x263A => Some(1),
             0x263B => Some(2),
             0x2665 => Some(3),

@@ -1,7 +1,7 @@
 use crate::ascii;
-use std::io::{Read, Write, BufReader, BufWriter};
-use std::fs::File;
 use std::error::Error;
+use std::fs::File;
+use std::io::{BufReader, BufWriter, Read, Write};
 
 pub fn read_file_to_bytes(file: &str) -> Result<Vec<u8>, Box<dyn Error>> {
     let mut bytes = Vec::new();
@@ -14,7 +14,7 @@ pub fn read_file_to_bytes(file: &str) -> Result<Vec<u8>, Box<dyn Error>> {
 pub fn write_bytes_to_file(bytes: &[u8], file: &str) -> Result<(), Box<dyn Error>> {
     let file = File::create(file)?;
     let mut buffer = BufWriter::new(file);
-    buffer.write_all(&bytes)?;
+    buffer.write_all(bytes)?;
     buffer.flush()?;
     Ok(())
 }
@@ -49,7 +49,7 @@ pub trait AsUSize {
 }
 
 pub trait PackToBytes {
-    fn pack_to_bytes(&self, bytes: &mut[u8]);
+    fn pack_to_bytes(&self, bytes: &mut [u8]);
 }
 
 impl VecOps<u8> for Vec<u8> {
@@ -74,7 +74,7 @@ impl VecOps<u8> for Vec<u8> {
 
     fn pad_with_value(&mut self, length: usize, value: u8) -> &Self {
         while self.len() < length {
-            &self.push(value);
+            self.push(value);
         }
         self
     }
@@ -99,12 +99,12 @@ impl VecOps<u8> for Vec<u8> {
 }
 
 impl PackToBytes for usize {
-    fn pack_to_bytes(&self, bytes: &mut[u8]) {
+    fn pack_to_bytes(&self, bytes: &mut [u8]) {
         let mut value = *self;
-        for i in 0..bytes.len() {
-            bytes[i] = (value & 255) as u8;
+        bytes.iter_mut().for_each(|byte| {
+            *byte = (value & 255) as u8;
             value >>= 8;
-        }
+        });
     }
 }
 

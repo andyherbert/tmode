@@ -61,10 +61,13 @@ pub static CP869_F16: &[u8; 4096] = include_bytes!("../../fonts/ibm/CP869.F16");
 pub static PETSCII_SHIFTED: &[u8; 2048] = include_bytes!("../../fonts/c64/PETSCII shifted.F08");
 pub static PETSCII_UNSHIFTED: &[u8; 2048] = include_bytes!("../../fonts/c64/PETSCII unshifted.F08");
 pub static MICRO_KNIGHT_F16: &[u8; 4096] = include_bytes!("../../fonts/amiga/MicroKnight.F16");
-pub static MICRO_KNIGHT_PLUS_F16: &[u8; 4096] = include_bytes!("../../fonts/amiga/MicroKnightPlus.F16");
+pub static MICRO_KNIGHT_PLUS_F16: &[u8; 4096] =
+    include_bytes!("../../fonts/amiga/MicroKnightPlus.F16");
 pub static P0T_NOODLE_F16: &[u8; 4096] = include_bytes!("../../fonts/amiga/P0T-NOoDLE.F16");
-pub static TOPAZ_PLUS_A1200_F16: &[u8; 4096] = include_bytes!("../../fonts/amiga/TopazPlus_a1200.F16");
-pub static TOPAZ_PLUS_A500_F16: &[u8; 4096] = include_bytes!("../../fonts/amiga/TopazPlus_a500.F16");
+pub static TOPAZ_PLUS_A1200_F16: &[u8; 4096] =
+    include_bytes!("../../fonts/amiga/TopazPlus_a1200.F16");
+pub static TOPAZ_PLUS_A500_F16: &[u8; 4096] =
+    include_bytes!("../../fonts/amiga/TopazPlus_a500.F16");
 pub static TOPAZ_A1200_F16: &[u8; 4096] = include_bytes!("../../fonts/amiga/Topaz_a1200.F16");
 pub static TOPAZ_A500_F16: &[u8; 4096] = include_bytes!("../../fonts/amiga/Topaz_a500.F16");
 pub static MO_SOUL_F16: &[u8; 4096] = include_bytes!("../../fonts/amiga/mO'sOul.F16");

@@ -1,17 +1,17 @@
-mod datatype;
-mod filetype;
-mod error;
 mod aspect_ratio;
+mod datatype;
+mod error;
+mod filetype;
 mod letter_spacing;
-pub use self::datatype::{DataType, AsDataType};
-pub use self::filetype::{FileType, AsFileType};
 pub use self::aspect_ratio::AspectRatio;
-pub use self::letter_spacing::LetterSpacing;
+pub use self::datatype::{AsDataType, DataType};
 use self::error::SauceError;
-use error::Error;
-use crate::string::*;
-use crate::bytes::*;
+pub use self::filetype::{AsFileType, FileType};
+pub use self::letter_spacing::LetterSpacing;
 use crate::ascii;
+use crate::bytes::*;
+use crate::string::*;
+use error::Error;
 use serde::{Deserialize, Serialize};
 
 #[derive(Default, Deserialize, Serialize)]
@@ -54,7 +54,7 @@ impl Sauce {
     }
 
     pub fn remove_from_bytes(bytes: &[u8]) -> Result<Vec<u8>, Box<dyn Error>> {
-        if let Some(sauce) = Sauce::from_bytes(&bytes)? {
+        if let Some(sauce) = Sauce::from_bytes(bytes)? {
             Ok(bytes[0..sauce.actual_filesize].to_vec())
         } else {
             Ok(bytes.to_vec())
@@ -69,7 +69,7 @@ impl Sauce {
     }
 
     pub fn add_to_bytes(&mut self, bytes: &mut Vec<u8>) -> Result<(), Box<dyn Error>> {
-        if let Some(sauce) = Sauce::from_bytes(&bytes)? {
+        if let Some(sauce) = Sauce::from_bytes(bytes)? {
             bytes.resize(sauce.actual_filesize, 0);
             self.filesize = sauce.actual_filesize;
         } else {
@@ -93,8 +93,7 @@ impl Sauce {
     }
 
     pub fn to_bytes(&self) -> Result<Vec<u8>, Box<dyn Error>> {
-        let mut bytes = Vec::new();
-        bytes.push(ascii::EOF);
+        let mut bytes = vec![ascii::EOF];
         let mut comments_length = 0;
         if let Some(comments) = &self.comments {
             let mut comments_bytes = comments.as_cp437_bytes();
@@ -104,20 +103,39 @@ impl Sauce {
             }
             comments_bytes.pad_with_spaces(comments_length * 64);
             bytes.resize(134 + comments_bytes.len(), ascii::NULL);
-            String::from("COMNT").as_cp437_bytes().write_to_slice(&mut bytes[1..=5])?;
+            String::from("COMNT")
+                .as_cp437_bytes()
+                .write_to_slice(&mut bytes[1..=5])?;
             comments_bytes.write_to_slice(&mut bytes[6..6 + comments_bytes.len()])?;
         } else {
             bytes.resize(129, ascii::NULL);
         }
         let sauce_start = bytes.len() - 128;
         let sauce_bytes = &mut bytes[sauce_start..];
-        String::from("SAUCE00").as_cp437_bytes().write_to_slice(&mut sauce_bytes[0..=6])?;
-        self.title.as_cp437_bytes().pad_with_spaces(35).write_to_slice(&mut sauce_bytes[7..=41])?;
-        self.author.as_cp437_bytes().pad_with_spaces(20).write_to_slice(&mut sauce_bytes[42..=61])?;
-        self.group.as_cp437_bytes().pad_with_spaces(20).write_to_slice(&mut sauce_bytes[62..=81])?;
-        self.year.as_cp437_bytes().write_to_slice(&mut sauce_bytes[82..=85])?;
-        self.month.as_cp437_bytes().write_to_slice(&mut sauce_bytes[86..=87])?;
-        self.date.as_cp437_bytes().write_to_slice(&mut sauce_bytes[88..=89])?;
+        String::from("SAUCE00")
+            .as_cp437_bytes()
+            .write_to_slice(&mut sauce_bytes[0..=6])?;
+        self.title
+            .as_cp437_bytes()
+            .pad_with_spaces(35)
+            .write_to_slice(&mut sauce_bytes[7..=41])?;
+        self.author
+            .as_cp437_bytes()
+            .pad_with_spaces(20)
+            .write_to_slice(&mut sauce_bytes[42..=61])?;
+        self.group
+            .as_cp437_bytes()
+            .pad_with_spaces(20)
+            .write_to_slice(&mut sauce_bytes[62..=81])?;
+        self.year
+            .as_cp437_bytes()
+            .write_to_slice(&mut sauce_bytes[82..=85])?;
+        self.month
+            .as_cp437_bytes()
+            .write_to_slice(&mut sauce_bytes[86..=87])?;
+        self.date
+            .as_cp437_bytes()
+            .write_to_slice(&mut sauce_bytes[88..=89])?;
         self.filesize.pack_to_bytes(&mut sauce_bytes[90..=93]);
         sauce_bytes[94] = match &self.datatype {
             Some(datatype) => datatype.as_u8(),
@@ -146,7 +164,10 @@ impl Sauce {
                 AspectRatio::Legacy => 1 << 3,
             }
         };
-        self.font_name.as_cp437_bytes().pad_with_null(22).write_to_slice(&mut sauce_bytes[106..=127])?;
+        self.font_name
+            .as_cp437_bytes()
+            .pad_with_null(22)
+            .write_to_slice(&mut sauce_bytes[106..=127])?;
         Ok(bytes.to_vec())
     }
 
@@ -161,9 +182,12 @@ impl Sauce {
         if id != "SAUCE00" {
             return Ok(None);
         }
-        sauce.title = String::from_cp437_bytes(&sauce_bytes[7..=41].to_vec().strip_trailing_spaces());
-        sauce.author = String::from_cp437_bytes(&sauce_bytes[42..=61].to_vec().strip_trailing_spaces());
-        sauce.group = String::from_cp437_bytes(&sauce_bytes[62..=81].to_vec().strip_trailing_spaces());
+        sauce.title =
+            String::from_cp437_bytes(sauce_bytes[7..=41].to_vec().strip_trailing_spaces());
+        sauce.author =
+            String::from_cp437_bytes(sauce_bytes[42..=61].to_vec().strip_trailing_spaces());
+        sauce.group =
+            String::from_cp437_bytes(sauce_bytes[62..=81].to_vec().strip_trailing_spaces());
         sauce.year = String::from_cp437_bytes(&sauce_bytes[82..=85].to_vec());
         sauce.month = String::from_cp437_bytes(&sauce_bytes[86..=87].to_vec());
         sauce.date = String::from_cp437_bytes(&sauce_bytes[88..=89].to_vec());
@@ -189,7 +213,8 @@ impl Sauce {
             2 => Some(AspectRatio::Modern),
             _ => return Err(Box::new(SauceError::InvalidAspectRatioValue)),
         };
-        sauce.font_name = String::from_cp437_bytes(&sauce_bytes[106..=127].to_vec().strip_trailing_null());
+        sauce.font_name =
+            String::from_cp437_bytes(sauce_bytes[106..=127].to_vec().strip_trailing_null());
         if lines_of_comments > 0 {
             if bytes.len() < 134 + lines_of_comments * 64 {
                 return Err(Box::new(SauceError::CommentsNotFound));

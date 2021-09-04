@@ -1,12 +1,12 @@
-mod sauce_opts;
 mod font_opts;
+mod sauce_opts;
+use clap::{clap_app, crate_authors, crate_description, crate_version};
+use font_opts::font_opts;
+use sauce_opts::sauce_opts;
 use std::error::Error;
-use clap::{clap_app, crate_version, crate_description, crate_authors};
+use std::process::exit;
 use std::u64;
 use wild::args;
-use sauce_opts::sauce_opts;
-use font_opts::font_opts;
-use std::process::exit;
 
 fn main() -> Result<(), Box<dyn Error>> {
     let app = clap_app!(tmode =>

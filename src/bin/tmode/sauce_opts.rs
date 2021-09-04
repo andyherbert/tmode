@@ -1,11 +1,11 @@
-use textmode::sauce::{Sauce, DataType, FileType, AspectRatio, LetterSpacing};
-use std::error::Error;
-use std::path::Path;
 use chrono::{Datelike, Local};
-use std::fs;
 use clap::{ArgMatches, Values};
-use image::image_dimensions;
 use fs::File;
+use image::image_dimensions;
+use std::error::Error;
+use std::fs;
+use std::path::Path;
+use textmode::sauce::{AspectRatio, DataType, FileType, LetterSpacing, Sauce};
 
 fn sauce_remove(values: Values) -> Result<(), Box<dyn Error>> {
     for file in values {
@@ -23,163 +23,150 @@ fn filetype(values: Values) -> Result<(), Box<dyn Error>> {
         if let Some(extension) = path.extension() {
             if let Some(extension) = extension.to_str() {
                 match extension.to_uppercase().as_str() {
-                    "GIF" => {
-                        match image_dimensions(file) {
-                            Ok((width, height)) => {
-                                match Sauce::from_file(file) {
-                                    Ok(sauce) => {
-                                        let mut sauce = match sauce {
-                                            Some(sauce) => sauce,
-                                            None => Sauce::new(),
-                                        };
-                                        sauce.datatype = Some(DataType::Bitmap);
-                                        sauce.filetype = Some(FileType::GIF);
-                                        sauce.info_1 = width as usize;
-                                        sauce.info_2 = height as usize;
-                                        match sauce.add_to_file(file) {
-                                            Ok(_) => println!("{}: Added filetype Bitmap/GIF ({}x{})", file, width, height),
-                                            Err(e) => eprintln!("{}: {}", file, e),
-                                        }
-                                    },
-                                    Err(e) => eprintln!("{}: {}", file, e),
-                                }
-                            },
-                            Err(e) => eprintln!("{}: {}", file, e),
-                        }
-                    },
-                    "IT" => {
-                        match Sauce::from_file(file) {
-                            Ok(sauce) => {
-                                let mut sauce = match sauce {
-                                    Some(sauce) => sauce,
-                                    None => Sauce::new(),
-                                };
-                                sauce.datatype = Some(DataType::Audio);
-                                sauce.filetype = Some(FileType::IT);
-                                match sauce.add_to_file(file) {
-                                    Ok(_) => println!("{}: Added filetype Audio/IT", file),
-                                    Err(e) => eprintln!("{}: {}", file, e),
-                                }
-                            },
-                            Err(e) => eprintln!("{}: {}", file, e),
-                        }
-                    },
-                    "JPG" | "JPEG "=> {
-                        match image_dimensions(file) {
-                            Ok((width, height)) => {
-                                match Sauce::from_file(file) {
-                                    Ok(sauce) => {
-                                        let mut sauce = match sauce {
-                                            Some(sauce) => sauce,
-                                            None => Sauce::new(),
-                                        };
-                                        sauce.datatype = Some(DataType::Bitmap);
-                                        sauce.filetype = Some(FileType::JPG);
-                                        sauce.info_1 = width as usize;
-                                        sauce.info_2 = height as usize;
-                                        match sauce.add_to_file(file) {
-                                            Ok(_) => println!("{}: Added filetype Bitmap/JPG ({}x{})", file, width, height),
-                                            Err(e) => eprintln!("{}: {}", file, e),
-                                        }
-                                    },
-                                    Err(e) => eprintln!("{}: {}", file, e),
-                                }
-                            },
-                            Err(_) => {
-                                match Sauce::from_file(file) {
-                                    Ok(sauce) => {
-                                        let mut sauce = match sauce {
-                                            Some(sauce) => sauce,
-                                            None => Sauce::new(),
-                                        };
-                                        sauce.datatype = Some(DataType::Bitmap);
-                                        sauce.filetype = Some(FileType::JPG);
-                                        match sauce.add_to_file(file) {
-                                            Ok(_) => println!("{}: Added filetype Bitmap/JPG", file),
-                                            Err(e) => eprintln!("{}: {}", file, e),
-                                        }
-                                    },
-                                    Err(e) => eprintln!("{}: {}", file, e),
-                                }
-                            },
-                        }
-                    },
-                    "MP4" => {
-                        match Sauce::from_file(file) {
+                    "GIF" => match image_dimensions(file) {
+                        Ok((width, height)) => match Sauce::from_file(file) {
                             Ok(sauce) => {
                                 let mut sauce = match sauce {
                                     Some(sauce) => sauce,
                                     None => Sauce::new(),
                                 };
                                 sauce.datatype = Some(DataType::Bitmap);
-                                sauce.filetype = Some(FileType::MPG);
+                                sauce.filetype = Some(FileType::GIF);
+                                sauce.info_1 = width as usize;
+                                sauce.info_2 = height as usize;
                                 match sauce.add_to_file(file) {
-                                    Ok(_) => println!("{}: Added filetype Bitmap/MPG", file),
+                                    Ok(_) => println!(
+                                        "{}: Added filetype Bitmap/GIF ({}x{})",
+                                        file, width, height
+                                    ),
                                     Err(e) => eprintln!("{}: {}", file, e),
                                 }
-                            },
+                            }
                             Err(e) => eprintln!("{}: {}", file, e),
-                        }
+                        },
+                        Err(e) => eprintln!("{}: {}", file, e),
                     },
-                    "PNG" => {
-                        match image_dimensions(file) {
-                            Ok((width, height)) => {
-                                match Sauce::from_file(file) {
-                                    Ok(sauce) => {
-                                        let mut sauce = match sauce {
-                                            Some(sauce) => sauce,
-                                            None => Sauce::new(),
-                                        };
-                                        sauce.datatype = Some(DataType::Bitmap);
-                                        sauce.filetype = Some(FileType::PNG);
-                                        sauce.info_1 = width as usize;
-                                        sauce.info_2 = height as usize;
-                                        match sauce.add_to_file(file) {
-                                            Ok(_) => println!("{}: Added filetype Bitmap/PNG ({}x{})", file, width, height),
-                                            Err(e) => eprintln!("{}: {}", file, e),
-                                        }
-                                    },
-                                    Err(e) => eprintln!("{}: {}", file, e),
-                                }
-                            },
-                            Err(e) => eprintln!("{}: {}", file, e),
+                    "IT" => match Sauce::from_file(file) {
+                        Ok(sauce) => {
+                            let mut sauce = match sauce {
+                                Some(sauce) => sauce,
+                                None => Sauce::new(),
+                            };
+                            sauce.datatype = Some(DataType::Audio);
+                            sauce.filetype = Some(FileType::IT);
+                            match sauce.add_to_file(file) {
+                                Ok(_) => println!("{}: Added filetype Audio/IT", file),
+                                Err(e) => eprintln!("{}: {}", file, e),
+                            }
                         }
+                        Err(e) => eprintln!("{}: {}", file, e),
                     },
-                    "RIP" => {
-                        match Sauce::from_file(file) {
+                    "JPG" | "JPEG " => match image_dimensions(file) {
+                        Ok((width, height)) => match Sauce::from_file(file) {
                             Ok(sauce) => {
                                 let mut sauce = match sauce {
                                     Some(sauce) => sauce,
                                     None => Sauce::new(),
                                 };
-                                sauce.datatype = Some(DataType::Character);
-                                sauce.filetype = Some(FileType::RIPScript);
+                                sauce.datatype = Some(DataType::Bitmap);
+                                sauce.filetype = Some(FileType::JPG);
+                                sauce.info_1 = width as usize;
+                                sauce.info_2 = height as usize;
                                 match sauce.add_to_file(file) {
-                                    Ok(_) => println!("{}: Added filetype Character/RIPScript", file),
+                                    Ok(_) => println!(
+                                        "{}: Added filetype Bitmap/JPG ({}x{})",
+                                        file, width, height
+                                    ),
                                     Err(e) => eprintln!("{}: {}", file, e),
                                 }
-                            },
+                            }
                             Err(e) => eprintln!("{}: {}", file, e),
-                        }
-                    },
-                    "S3M" => {
-                        match Sauce::from_file(file) {
+                        },
+                        Err(_) => match Sauce::from_file(file) {
                             Ok(sauce) => {
                                 let mut sauce = match sauce {
                                     Some(sauce) => sauce,
                                     None => Sauce::new(),
                                 };
-                                sauce.datatype = Some(DataType::Audio);
-                                sauce.filetype = Some(FileType::S3M);
+                                sauce.datatype = Some(DataType::Bitmap);
+                                sauce.filetype = Some(FileType::JPG);
                                 match sauce.add_to_file(file) {
-                                    Ok(_) => println!("{}: Added filetype Audio/S3M", file),
+                                    Ok(_) => println!("{}: Added filetype Bitmap/JPG", file),
                                     Err(e) => eprintln!("{}: {}", file, e),
                                 }
-                            },
+                            }
                             Err(e) => eprintln!("{}: {}", file, e),
-                        }
+                        },
                     },
-                    _ => {},
+                    "MP4" => match Sauce::from_file(file) {
+                        Ok(sauce) => {
+                            let mut sauce = match sauce {
+                                Some(sauce) => sauce,
+                                None => Sauce::new(),
+                            };
+                            sauce.datatype = Some(DataType::Bitmap);
+                            sauce.filetype = Some(FileType::MPG);
+                            match sauce.add_to_file(file) {
+                                Ok(_) => println!("{}: Added filetype Bitmap/MPG", file),
+                                Err(e) => eprintln!("{}: {}", file, e),
+                            }
+                        }
+                        Err(e) => eprintln!("{}: {}", file, e),
+                    },
+                    "PNG" => match image_dimensions(file) {
+                        Ok((width, height)) => match Sauce::from_file(file) {
+                            Ok(sauce) => {
+                                let mut sauce = match sauce {
+                                    Some(sauce) => sauce,
+                                    None => Sauce::new(),
+                                };
+                                sauce.datatype = Some(DataType::Bitmap);
+                                sauce.filetype = Some(FileType::PNG);
+                                sauce.info_1 = width as usize;
+                                sauce.info_2 = height as usize;
+                                match sauce.add_to_file(file) {
+                                    Ok(_) => println!(
+                                        "{}: Added filetype Bitmap/PNG ({}x{})",
+                                        file, width, height
+                                    ),
+                                    Err(e) => eprintln!("{}: {}", file, e),
+                                }
+                            }
+                            Err(e) => eprintln!("{}: {}", file, e),
+                        },
+                        Err(e) => eprintln!("{}: {}", file, e),
+                    },
+                    "RIP" => match Sauce::from_file(file) {
+                        Ok(sauce) => {
+                            let mut sauce = match sauce {
+                                Some(sauce) => sauce,
+                                None => Sauce::new(),
+                            };
+                            sauce.datatype = Some(DataType::Character);
+                            sauce.filetype = Some(FileType::RIPScript);
+                            match sauce.add_to_file(file) {
+                                Ok(_) => println!("{}: Added filetype Character/RIPScript", file),
+                                Err(e) => eprintln!("{}: {}", file, e),
+                            }
+                        }
+                        Err(e) => eprintln!("{}: {}", file, e),
+                    },
+                    "S3M" => match Sauce::from_file(file) {
+                        Ok(sauce) => {
+                            let mut sauce = match sauce {
+                                Some(sauce) => sauce,
+                                None => Sauce::new(),
+                            };
+                            sauce.datatype = Some(DataType::Audio);
+                            sauce.filetype = Some(FileType::S3M);
+                            match sauce.add_to_file(file) {
+                                Ok(_) => println!("{}: Added filetype Audio/S3M", file),
+                                Err(e) => eprintln!("{}: {}", file, e),
+                            }
+                        }
+                        Err(e) => eprintln!("{}: {}", file, e),
+                    },
+                    _ => {}
                 }
             }
         }
@@ -198,7 +185,7 @@ fn title(values: Values, title: &str) -> Result<(), Box<dyn Error>> {
                         Err(e) => eprintln!("{}: {}", file, e),
                     }
                 }
-            },
+            }
             Err(e) => eprintln!("{}: {}", file, e),
         }
     }
@@ -216,7 +203,7 @@ fn author(values: Values, author: &str) -> Result<(), Box<dyn Error>> {
                         Err(e) => eprintln!("{}: {}", file, e),
                     }
                 }
-            },
+            }
             Err(e) => eprintln!("{}: {}", file, e),
         }
     }
@@ -234,7 +221,7 @@ fn group(values: Values, group: &str) -> Result<(), Box<dyn Error>> {
                         Err(e) => eprintln!("{}: {}", file, e),
                     }
                 }
-            },
+            }
             Err(e) => eprintln!("{}: {}", file, e),
         }
     }
@@ -258,7 +245,7 @@ fn current_date(values: Values) -> Result<(), Box<dyn Error>> {
                         Err(e) => eprintln!("{}: {}", file, e),
                     }
                 }
-            },
+            }
             Err(e) => eprintln!("{}: {}", file, e),
         }
     }
@@ -277,11 +264,11 @@ fn year(values: Values, year: &str) -> Result<(), Box<dyn Error>> {
                                 Ok(_) => println!("{}: Added year", file),
                                 Err(e) => eprintln!("{}: {}", file, e),
                             }
-                        },
+                        }
                         Err(e) => eprintln!("{}: {}", file, e),
                     }
                 }
-            },
+            }
             Err(e) => eprintln!("{}: {}", file, e),
         }
     }
@@ -300,11 +287,11 @@ fn month(values: Values, month: &str) -> Result<(), Box<dyn Error>> {
                                 Ok(_) => println!("{}: Added month", file),
                                 Err(e) => eprintln!("{}: {}", file, e),
                             }
-                        },
+                        }
                         Err(e) => eprintln!("{}: {}", file, e),
                     }
                 }
-            },
+            }
             Err(e) => eprintln!("{}: {}", file, e),
         }
     }
@@ -323,11 +310,11 @@ fn day(values: Values, day: &str) -> Result<(), Box<dyn Error>> {
                                 Ok(_) => println!("{}: Added day", file),
                                 Err(e) => eprintln!("{}: {}", file, e),
                             }
-                        },
+                        }
                         Err(e) => eprintln!("{}: {}", file, e),
                     }
                 }
-            },
+            }
             Err(e) => eprintln!("{}: {}", file, e),
         }
     }
@@ -346,11 +333,11 @@ fn info_1(values: Values, info_1: &str) -> Result<(), Box<dyn Error>> {
                                 Ok(_) => println!("{}: Added value", file),
                                 Err(e) => eprintln!("{}: {}", file, e),
                             }
-                        },
+                        }
                         Err(e) => eprintln!("{}: {}", file, e),
                     }
                 }
-            },
+            }
             Err(e) => eprintln!("{}: {}", file, e),
         }
     }
@@ -369,11 +356,11 @@ fn info_2(values: Values, info_2: &str) -> Result<(), Box<dyn Error>> {
                                 Ok(_) => println!("{}: Added value", file),
                                 Err(e) => eprintln!("{}: {}", file, e),
                             }
-                        },
+                        }
                         Err(e) => eprintln!("{}: {}", file, e),
                     }
                 }
-            },
+            }
             Err(e) => eprintln!("{}: {}", file, e),
         }
     }
@@ -392,11 +379,11 @@ fn info_3(values: Values, info_3: &str) -> Result<(), Box<dyn Error>> {
                                 Ok(_) => println!("{}: Added value", file),
                                 Err(e) => eprintln!("{}: {}", file, e),
                             }
-                        },
+                        }
                         Err(e) => eprintln!("{}: {}", file, e),
                     }
                 }
-            },
+            }
             Err(e) => eprintln!("{}: {}", file, e),
         }
     }
@@ -415,11 +402,11 @@ fn info_4(values: Values, info_4: &str) -> Result<(), Box<dyn Error>> {
                                 Ok(_) => println!("{}: Added value", file),
                                 Err(e) => eprintln!("{}: {}", file, e),
                             }
-                        },
+                        }
                         Err(e) => eprintln!("{}: {}", file, e),
                     }
                 }
-            },
+            }
             Err(e) => eprintln!("{}: {}", file, e),
         }
     }
@@ -439,25 +426,32 @@ fn set_ice_colors(values: Values, ice_colors: bool) -> Result<(), Box<dyn Error>
                         }
                     } else {
                         match sauce.filetype {
-                            Some(FileType::ASCII) | Some(FileType::ANSI) | Some(FileType::ANSImation) => {
+                            Some(FileType::ASCII)
+                            | Some(FileType::ANSI)
+                            | Some(FileType::ANSImation) => {
                                 sauce.ice_colors = ice_colors;
                                 match sauce.add_to_file(file) {
-                                    Ok(_) => println!("{}: Changed ice-colors to {}", file, ice_colors),
+                                    Ok(_) => {
+                                        println!("{}: Changed ice-colors to {}", file, ice_colors)
+                                    }
                                     Err(e) => eprintln!("{}: {}", file, e),
                                 }
-                            },
-                            _ => {},
+                            }
+                            _ => {}
                         }
                     }
                 }
-            },
+            }
             Err(e) => eprintln!("{}: {}", file, e),
         }
     }
     Ok(())
 }
 
-fn set_aspect_ratio(values: Values, aspect_ratio: Option<AspectRatio>) -> Result<(), Box<dyn Error>> {
+fn set_aspect_ratio(
+    values: Values,
+    aspect_ratio: Option<AspectRatio>,
+) -> Result<(), Box<dyn Error>> {
     for file in values {
         match Sauce::from_file(file) {
             Ok(sauce) => {
@@ -471,36 +465,44 @@ fn set_aspect_ratio(values: Values, aspect_ratio: Option<AspectRatio>) -> Result
                                 } else {
                                     println!("{}: Removed aspect ratio setting", file);
                                 }
-                            },
+                            }
                             Err(e) => eprintln!("{}: {}", file, e),
                         }
                     } else {
                         match sauce.filetype {
-                            Some(FileType::ASCII) | Some(FileType::ANSI) | Some(FileType::ANSImation) => {
+                            Some(FileType::ASCII)
+                            | Some(FileType::ANSI)
+                            | Some(FileType::ANSImation) => {
                                 sauce.aspect_ratio = aspect_ratio.clone();
                                 match sauce.add_to_file(file) {
                                     Ok(_) => {
                                         if let Some(aspect_ratio) = sauce.aspect_ratio {
-                                            println!("{}: Changed aspect ratio to {}", file, aspect_ratio);
+                                            println!(
+                                                "{}: Changed aspect ratio to {}",
+                                                file, aspect_ratio
+                                            );
                                         } else {
                                             println!("{}: Removed aspect ratio setting", file);
                                         }
-                                    },
+                                    }
                                     Err(e) => eprintln!("{}: {}", file, e),
                                 }
-                            },
-                            _ => {},
+                            }
+                            _ => {}
                         }
                     }
                 }
-            },
+            }
             Err(e) => eprintln!("{}: {}", file, e),
         }
     }
     Ok(())
 }
 
-fn set_letter_spacing(values: Values, letter_spacing: Option<LetterSpacing>) -> Result<(), Box<dyn Error>> {
+fn set_letter_spacing(
+    values: Values,
+    letter_spacing: Option<LetterSpacing>,
+) -> Result<(), Box<dyn Error>> {
     for file in values {
         match Sauce::from_file(file) {
             Ok(sauce) => {
@@ -510,33 +512,41 @@ fn set_letter_spacing(values: Values, letter_spacing: Option<LetterSpacing>) -> 
                         match sauce.add_to_file(file) {
                             Ok(_) => {
                                 if let Some(letter_spacing) = sauce.letter_spacing {
-                                    println!("{}: Changed letter spacing to {}", file, letter_spacing);
+                                    println!(
+                                        "{}: Changed letter spacing to {}",
+                                        file, letter_spacing
+                                    );
                                 } else {
                                     println!("{}: Removed letter spacing setting", file);
                                 }
-                            },
+                            }
                             Err(e) => eprintln!("{}: {}", file, e),
                         }
                     } else {
                         match sauce.filetype {
-                            Some(FileType::ASCII) | Some(FileType::ANSI) | Some(FileType::ANSImation) => {
+                            Some(FileType::ASCII)
+                            | Some(FileType::ANSI)
+                            | Some(FileType::ANSImation) => {
                                 sauce.letter_spacing = letter_spacing.clone();
                                 match sauce.add_to_file(file) {
                                     Ok(_) => {
                                         if let Some(letter_spacing) = sauce.letter_spacing {
-                                            println!("{}: Changed letter spacing to {}", file, letter_spacing);
+                                            println!(
+                                                "{}: Changed letter spacing to {}",
+                                                file, letter_spacing
+                                            );
                                         } else {
                                             println!("{}: Removed letter spacing setting", file);
                                         }
-                                    },
+                                    }
                                     Err(e) => eprintln!("{}: {}", file, e),
                                 }
-                            },
-                            _ => {},
+                            }
+                            _ => {}
                         }
                     }
                 }
-            },
+            }
             Err(e) => eprintln!("{}: {}", file, e),
         }
     }
@@ -554,7 +564,7 @@ fn font(values: Values, font: &str) -> Result<(), Box<dyn Error>> {
                         Err(e) => eprintln!("{}: {}", file, e),
                     }
                 }
-            },
+            }
             Err(e) => eprintln!("{}: {}", file, e),
         }
     }
@@ -576,7 +586,7 @@ fn comments(values: Values, comments: &str) -> Result<(), Box<dyn Error>> {
                         Err(e) => eprintln!("{}: {}", file, e),
                     }
                 }
-            },
+            }
             Err(e) => eprintln!("{}: {}", file, e),
         }
     }
@@ -587,10 +597,10 @@ fn no_sauce(values: Values) -> Result<(), Box<dyn Error>> {
     for file in values {
         match Sauce::from_file(file) {
             Ok(sauce) => {
-                if let None = sauce {
+                if sauce.is_none() {
                     println!("{}: No SAUCE record found", file);
                 }
-            },
+            }
             Err(e) => eprintln!("{}: {}", file, e),
         }
     }
@@ -604,7 +614,7 @@ fn sauce_display(values: Values) -> Result<(), Box<dyn Error>> {
                 if let Some(sauce) = sauce {
                     println!("{}", sauce);
                 }
-            },
+            }
             Err(e) => eprintln!("{}: {}", file, e),
         }
     }
@@ -619,7 +629,7 @@ fn export_csv(values: Values, csv_file: &str) -> Result<(), Box<dyn Error>> {
                 if let Some(sauce) = sauce {
                     wtr.serialize(sauce)?;
                 }
-            },
+            }
             Err(e) => eprintln!("{}: {}", file, e),
         }
     }
@@ -635,7 +645,7 @@ fn export_json(values: Values, json_file: &str) -> Result<(), Box<dyn Error>> {
                 if let Some(sauce) = sauce {
                     vec.push(sauce);
                 }
-            },
+            }
             Err(e) => eprintln!("{}: {}", file, e),
         }
     }
@@ -680,37 +690,67 @@ pub fn sauce_opts(matches: &ArgMatches) -> Result<(), Box<dyn Error>> {
         filetype(matches.values_of("files").unwrap())?;
     }
     if matches.is_present("title") {
-        title(matches.values_of("files").unwrap(), matches.value_of("title").unwrap())?;
+        title(
+            matches.values_of("files").unwrap(),
+            matches.value_of("title").unwrap(),
+        )?;
     }
     if matches.is_present("author") {
-        author(matches.values_of("files").unwrap(), matches.value_of("author").unwrap())?;
+        author(
+            matches.values_of("files").unwrap(),
+            matches.value_of("author").unwrap(),
+        )?;
     }
     if matches.is_present("group") {
-        group(matches.values_of("files").unwrap(), matches.value_of("group").unwrap())?;
+        group(
+            matches.values_of("files").unwrap(),
+            matches.value_of("group").unwrap(),
+        )?;
     }
     if matches.is_present("current_date") {
         current_date(matches.values_of("files").unwrap())?;
     }
     if matches.is_present("year") {
-        year(matches.values_of("files").unwrap(), matches.value_of("year").unwrap())?;
+        year(
+            matches.values_of("files").unwrap(),
+            matches.value_of("year").unwrap(),
+        )?;
     }
     if matches.is_present("month") {
-        month(matches.values_of("files").unwrap(), matches.value_of("month").unwrap())?;
+        month(
+            matches.values_of("files").unwrap(),
+            matches.value_of("month").unwrap(),
+        )?;
     }
     if matches.is_present("day") {
-        day(matches.values_of("files").unwrap(), matches.value_of("day").unwrap())?;
+        day(
+            matches.values_of("files").unwrap(),
+            matches.value_of("day").unwrap(),
+        )?;
     }
     if matches.is_present("info_1") {
-        info_1(matches.values_of("files").unwrap(), matches.value_of("info_1").unwrap())?;
+        info_1(
+            matches.values_of("files").unwrap(),
+            matches.value_of("info_1").unwrap(),
+        )?;
     }
     if matches.is_present("info_2") {
-        info_2(matches.values_of("files").unwrap(), matches.value_of("info_2").unwrap())?;
+        info_2(
+            matches.values_of("files").unwrap(),
+            matches.value_of("info_2").unwrap(),
+        )?;
     }
     if matches.is_present("info_3") {
-        info_3(matches.values_of("files").unwrap(), matches.value_of("info_3").unwrap())?;
+        info_3(
+            matches.values_of("files").unwrap(),
+            matches.value_of("info_3").unwrap(),
+        )?;
     }
     if matches.is_present("info_4") {
-        info_4(matches.values_of("files").unwrap(), matches.value_of("info_4").unwrap())?;
+        info_4(
+            matches.values_of("files").unwrap(),
+            matches.value_of("info_4").unwrap(),
+        )?;
     }
     if matches.is_present("ice_colors") {
         set_ice_colors(matches.values_of("files").unwrap(), true)?;
@@ -719,28 +759,46 @@ pub fn sauce_opts(matches: &ArgMatches) -> Result<(), Box<dyn Error>> {
         set_ice_colors(matches.values_of("files").unwrap(), false)?;
     }
     if matches.is_present("modern_aspect") {
-        set_aspect_ratio(matches.values_of("files").unwrap(), Some(AspectRatio::Modern))?;
+        set_aspect_ratio(
+            matches.values_of("files").unwrap(),
+            Some(AspectRatio::Modern),
+        )?;
     }
     if matches.is_present("legacy_aspect") {
-        set_aspect_ratio(matches.values_of("files").unwrap(), Some(AspectRatio::Legacy))?;
+        set_aspect_ratio(
+            matches.values_of("files").unwrap(),
+            Some(AspectRatio::Legacy),
+        )?;
     }
     if matches.is_present("unset_aspect") {
         set_aspect_ratio(matches.values_of("files").unwrap(), None)?;
     }
     if matches.is_present("letter_spacing") {
-        set_letter_spacing(matches.values_of("files").unwrap(), Some(LetterSpacing::NinePixels))?;
+        set_letter_spacing(
+            matches.values_of("files").unwrap(),
+            Some(LetterSpacing::NinePixels),
+        )?;
     }
     if matches.is_present("no_letter_spacing") {
-        set_letter_spacing(matches.values_of("files").unwrap(), Some(LetterSpacing::EightPixels))?;
+        set_letter_spacing(
+            matches.values_of("files").unwrap(),
+            Some(LetterSpacing::EightPixels),
+        )?;
     }
     if matches.is_present("unset_letter_spacing") {
         set_letter_spacing(matches.values_of("files").unwrap(), None)?;
     }
     if matches.is_present("font") {
-        font(matches.values_of("files").unwrap(), matches.value_of("font").unwrap())?;
+        font(
+            matches.values_of("files").unwrap(),
+            matches.value_of("font").unwrap(),
+        )?;
     }
     if matches.is_present("comments") {
-        comments(matches.values_of("files").unwrap(), matches.value_of("comments").unwrap())?;
+        comments(
+            matches.values_of("files").unwrap(),
+            matches.value_of("comments").unwrap(),
+        )?;
     }
     if matches.is_present("no_sauce") {
         no_sauce(matches.values_of("files").unwrap())?;
@@ -749,10 +807,16 @@ pub fn sauce_opts(matches: &ArgMatches) -> Result<(), Box<dyn Error>> {
         sauce_display(matches.values_of("files").unwrap())?;
     }
     if matches.is_present("export_csv") {
-        export_csv(matches.values_of("files").unwrap(), matches.value_of("export_csv").unwrap())?;
+        export_csv(
+            matches.values_of("files").unwrap(),
+            matches.value_of("export_csv").unwrap(),
+        )?;
     }
     if matches.is_present("export_json") {
-        export_json(matches.values_of("files").unwrap(), matches.value_of("export_json").unwrap())?;
+        export_json(
+            matches.values_of("files").unwrap(),
+            matches.value_of("export_json").unwrap(),
+        )?;
     }
     if matches.is_present("import_csv") {
         import_csv(matches.value_of("import_csv").unwrap())?;

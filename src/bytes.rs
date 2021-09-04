@@ -37,10 +37,10 @@ impl Error for BytesError {}
 pub trait VecOps<T> {
     fn strip_trailing_value(&mut self, value: T) -> &Vec<T>;
     fn strip_trailing_spaces(&mut self) -> &Vec<T>;
-    fn strip_trailing_null(&mut self) -> &Vec<T>;
+    fn strip_trailing_nulls(&mut self) -> &Vec<T>;
     fn pad_with_value(&mut self, length: usize, value: T) -> &Self;
     fn pad_with_spaces(&mut self, length: usize) -> &Self;
-    fn pad_with_null(&mut self, length: usize) -> &Self;
+    fn pad_with_nulls(&mut self, length: usize) -> &Self;
     fn write_to_slice(&self, slice: &mut [u8]) -> Result<(), Box<dyn Error>>;
 }
 
@@ -68,7 +68,7 @@ impl VecOps<u8> for Vec<u8> {
         self.strip_trailing_value(ascii::SPACE)
     }
 
-    fn strip_trailing_null(&mut self) -> &Vec<u8> {
+    fn strip_trailing_nulls(&mut self) -> &Vec<u8> {
         self.strip_trailing_value(ascii::NULL)
     }
 
@@ -83,7 +83,7 @@ impl VecOps<u8> for Vec<u8> {
         self.pad_with_value(length, ascii::SPACE)
     }
 
-    fn pad_with_null(&mut self, length: usize) -> &Self {
+    fn pad_with_nulls(&mut self, length: usize) -> &Self {
         self.pad_with_value(length, ascii::NULL)
     }
 

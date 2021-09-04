@@ -166,7 +166,7 @@ impl Sauce {
         };
         self.font_name
             .as_cp437_bytes()
-            .pad_with_null(22)
+            .pad_with_nulls(22)
             .write_to_slice(&mut sauce_bytes[106..=127])?;
         Ok(bytes.to_vec())
     }
@@ -214,7 +214,7 @@ impl Sauce {
             _ => return Err(Box::new(SauceError::InvalidAspectRatioValue)),
         };
         sauce.font_name =
-            String::from_cp437_bytes(sauce_bytes[106..=127].to_vec().strip_trailing_null());
+            String::from_cp437_bytes(sauce_bytes[106..=127].to_vec().strip_trailing_nulls());
         if lines_of_comments > 0 {
             if bytes.len() < 134 + lines_of_comments * 64 {
                 return Err(Box::new(SauceError::CommentsNotFound));

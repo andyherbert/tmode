@@ -5,7 +5,7 @@ use image::image_dimensions;
 use std::error::Error;
 use std::fs;
 use std::path::Path;
-use textmode::sauce::{AspectRatio, DataType, FileType, LetterSpacing, Sauce};
+use tmode::sauce::{AspectRatio, DataType, FileType, LetterSpacing, Sauce};
 
 fn sauce_remove(values: Values) -> Result<(), Box<dyn Error>> {
     for file in values {

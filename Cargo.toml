@@ -1,5 +1,5 @@
 [package]
-name = "textmode"
+name = "tmode"
 version = "0.0.1"
 authors = ["Andy Herbert <andy.herbert@gmail.com>"]
 edition = "2018"

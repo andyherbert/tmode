@@ -1,7 +1,7 @@
 use clap::ArgMatches;
 use std::error::Error;
 use std::path::Path;
-use textmode::font::Font;
+use tmode::font::Font;
 
 pub fn font_as_png(
     font_file: &str,
